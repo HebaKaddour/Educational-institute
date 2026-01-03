@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\V1;
+namespace App\Http\Requests\V1\Students;
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -46,7 +46,7 @@ public function rules(): array
     {
         return [
             'full_name' => 'الاسم الكامل',
-              'identification_number' => 'رقم الهوية',
+            'identification_number' => 'رقم الهوية',
             'student_number' => 'رقم الطالب',
             'guardian_number' => 'رقم ولي الأمر',
             'age' => 'العمر',
@@ -68,8 +68,8 @@ public function rules(): array
     {
         return [
             'full_name.required' => 'الاسم الكامل مطلوب',
-            'id_number.required' => 'رقم الهوية مطلوب',
-              'identification_number.unique' => 'رقم الهوية مستخدم مسبقًا',
+            'identification.required' => 'رقم الهوية مطلوب',
+            'identification_number.unique' => 'رقم الهوية مستخدم مسبقًا',
             'age.required' => 'العمر مطلوب',
             'gender.required' => 'الجنس مطلوب',
             'school.required' => 'المدرسة مطلوبة',

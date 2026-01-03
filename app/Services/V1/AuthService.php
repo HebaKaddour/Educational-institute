@@ -4,6 +4,7 @@ namespace App\Services\V1;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\AuthenticationException;
 
 
 class AuthService{
@@ -20,7 +21,7 @@ public function login(array $credentials): ?array
             'id' => $user->id,
             'name' => $user->name,
             'email' => $user->email,
-            'roles' => $user->roles, // موجود
+            'roles' => $user->getRoleNames()->first(), // جميع الأدوار
             'permissions' => $user->getAllPermissions()->pluck('name'), // جميع الصلاحيات
             'token' => $token
         ];
@@ -30,9 +31,7 @@ public function login(array $credentials): ?array
         $user = Auth::user();
 
         if (!$user) {
-            throw ValidationException::withMessages([
-                'user' => ['المستخدم غير موجود']
-            ]);
+            throw new AuthenticationException('المستخدم غير موجود');
         }
 
         // التحقق من كلمة المرور الحالية

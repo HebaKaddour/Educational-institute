@@ -6,7 +6,7 @@ use App\Models\Subject;
 use App\Services\V1\SubjectService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\StoreSubjectRequest;
-use App\Http\Requests\V1\Subject\UpdateSubjectRequest;
+use App\Http\Requests\V1\UpdateSubjectRequest;
 
 class SubjectController extends Controller
 {

@@ -15,24 +15,20 @@ class UpdateTeacherRequest extends FormRequest
     {
         return [
             'name' => ['sometimes', 'string', 'max:255'],
-            'email' => [
-                'sometimes',
-                'email',
-                'unique:users,email,' . $this->route('teacher')
-            ],
+            'email' => ['sometimes','email','unique:users,email,' . $this->route('teacher')],
             'password' => ['sometimes', 'nullable', 'string', 'min:8', 'confirmed'],
         ];
     }
 
-    /**
-     * أسماء الحقول بالعربي (للداشبورد)
-     */
+
     public function attributes(): array
     {
         return [
             'name' => 'اسم المعلم',
             'email' => 'البريد الإلكتروني',
             'password' => 'كلمة المرور',
+            'password_confirmation' => 'تأكيد كلمة السر الجديدة',
+
         ];
     }
 

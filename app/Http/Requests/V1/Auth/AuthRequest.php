@@ -22,27 +22,27 @@ class AuthRequest extends FormRequest
     public function rules(): array
     {
         return [
-           'الايميل' => 'required|email|',
-           'كلمة_السر' => 'required|string|min:8|',
+           'email' => 'required|email|',
+           'password' => 'required|string|min:8|',
         ];
     }
 
-    protected function prepareForValidation()
+    public function attributes() : array
     {
-        $this->merge([
-            'email' => $this->input('الايميل'),
-            'password' => $this->input('كلمة_السر'),
-        ]);
+        return [
+            'email' => 'الايميل',
+            'password' => 'كلمة المرور',
+        ];
     }
 
     public function messages(): array
     {
         return [
-            'الايميل.required'    => 'حقل الايميل مطلوب.',
-            'الايميل.email'       => 'حقل الايميل يجب أن يكون عنوان بريد إلكتروني صالح.',
-            'كلمة_السر.required'  => 'حقل كلمة السر مطلوب.',
-            'كلمة_السر.string'    => 'حقل كلمة السر يجب أن يكون نصاً.',
-            'كلمة_السر.min'       => 'حقل كلمة السر يجب أن يكون على الأقل 8 أحرف.',
+            'email.required'    => 'حقل الايميل مطلوب.',
+            'email.email'       => 'حقل الايميل يجب أن يكون عنوان بريد إلكتروني صالح.',
+            'password.required'  => 'حقل كلمة السر مطلوب.',
+            'password.string'    => 'حقل كلمة السر يجب أن يكون نصاً.',
+            'password.min'       => 'حقل كلمة السر يجب أن يكون على الأقل 8 أحرف.',
         ];
     }
 }

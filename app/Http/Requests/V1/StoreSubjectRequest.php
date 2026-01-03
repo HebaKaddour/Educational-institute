@@ -14,7 +14,7 @@ class StoreSubjectRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|unique:subjects,name|max:255',
             'teacher_id' => 'required|exists:users,id',
         ];
     }
@@ -23,7 +23,6 @@ class StoreSubjectRequest extends FormRequest
     {
         $mergeData = [];
 
-        // تحويل الحقول العربية المرسلة من الفرونت
         if ($this->filled('اسم_المادة')) {
             $mergeData['name'] = $this->input('اسم_المادة');
         }
@@ -40,6 +39,7 @@ class StoreSubjectRequest extends FormRequest
         return [
             'name.required' => 'اسم المادة مطلوب',
             'name.string' => 'اسم المادة يجب أن يكون نصًا',
+            'name.unique' => 'اسم المادة مستخدم مسبقًا',
             'name.max' => 'اسم المادة طويل جدًا',
             'teacher_id.required' => 'المعلم مطلوب',
             'teacher_id.exists' => 'المعلم غير موجود',

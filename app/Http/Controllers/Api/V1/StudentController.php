@@ -6,11 +6,12 @@ use App\Models\Student;
 use App\Models\Subscription;
 use App\Services\V1\StudentService;
 use App\Http\Controllers\Controller;
-use App\Http\Requests\V1\StoreSudentRequest;
-use App\Http\Requests\V1\StoreStudentRequest;
-use App\Http\Requests\V1\UpdateStudentRequest;
+use App\Http\Requests\V1\Students\StoreStudentRequest;
+use App\Http\Requests\V1\Students\SearchStudentRequest;
+use App\Http\Requests\V1\Students\UpdateStudentRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Http\Requests\V1\UpdateSubscriptionStudentRequest;
+use App\Http\Requests\V1\Students\AddSubscriptionRequest;
+use App\Http\Requests\V1\Students\UpdateSubscriptionStudentRequest;
 
 class StudentController extends Controller
 {
@@ -25,6 +26,14 @@ class StudentController extends Controller
             'قائمة الطلاب'
         );
     }
+
+public function search(SearchStudentRequest $request)
+{
+    $students = $this->studentService
+        ->searchStudents($request->validated()['query']);
+
+    return self::success($students, 'نتائج البحث');
+}
 
    public function show(Student $student)
     {
@@ -61,7 +70,7 @@ class StudentController extends Controller
 
     $updated = $this->studentService->paySubscription($subscription, $request->payment_amount);
 
- return self::success($updated, 'تم تسجيل الدفعة بنجاح', 200);
+     return self::success($updated, 'تم تسجيل الدفعة بنجاح', 200);
 }
 
      public function update(UpdateStudentRequest $request, Student $student)
@@ -75,7 +84,15 @@ class StudentController extends Controller
     );
 }
 
+    public function addSubscription(AddSubscriptionRequest $request,Student $student) {
+        $subscription = $this->studentService
+            ->addSubscription($student, $request->validated());
 
+        return self::success($subscription->load('subject.teacher:id,name'),
+            'تم إضافة المادة للطالب بنجاح',
+            201
+        );
+    }
     public function destroy(Student $student)
     {
         $this->studentService->deleteStudent($student);

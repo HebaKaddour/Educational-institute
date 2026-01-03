@@ -63,10 +63,17 @@ class Handler extends ExceptionHandler
             return Controller::error($exception->getMessage() ?: 'خطأ في الطلب', $exception->getStatusCode());
         }
 
-        // Authorization
-        if ($exception instanceof AuthorizationException) {
-            return Controller::error('غير مصرح لك بتنفيذ هذا الإجراء', 403);
+        //role
+        if ($exception instanceof \Spatie\Permission\Exceptions\UnauthorizedException) {
+            return Controller::error('ليس لديك الصلاحية اللازمة للوصول إلى هذا المورد', 403);
         }
+        // Authorization
+       if ($exception instanceof AuthorizationException) {
+        return Controller::error($exception->getMessage(), 403);
+
+    }
+
+
 
         // Fallback
       //  return Controller::error('حدث خطأ ما', 500);

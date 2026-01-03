@@ -20,14 +20,14 @@ class StoreTeacherRequest extends FormRequest
         ];
     }
 
-    protected function prepareForValidation()
+    public function attributes() : array
     {
-        $this->merge([
-            'name'     => $this->input('الاسم'),
-            'email'    => $this->input('الايميل'),
-            'password' => $this->input('كلمة_السر'),
-            'password_confirmation' => $this->input('تأكيد_كلمة_السر'),
-        ]);
+        return [
+            'name'     => 'اسم المعلم',
+            'email'    => 'البريد الإلكتروني',
+            'password' => 'كلمة المرور',
+            'password_confirmation' => 'تأكيد كلمة المرور',
+        ];
     }
 
     public function messages(): array

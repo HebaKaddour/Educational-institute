@@ -35,15 +35,17 @@ class RolesAndPermissionsSeeder extends Seeder
         $teacher = Role::firstOrCreate(['name' => 'teacher','guard_name' => 'api']);
 
         $admin->givePermissionTo($permissions);
+
         $teacher->givePermissionTo
         (['create_Evaluation' ,
          'update_Evaluation' ,
-         'delete_Evaluation' ,
+         //'delete_Evaluation' ,
          'show_Evaluation',
          'list_students',
          'create_attendance' ,
          'update_attendance',
-         'delete_attendance',
-         'show_attendance',]);
+         //'delete_attendance',
+        // 'show_attendance',
+        ]);
     }
 }

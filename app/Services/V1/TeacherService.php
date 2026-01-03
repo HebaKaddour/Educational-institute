@@ -35,12 +35,10 @@ public function updateTeacher(User $teacher, array $data): User
     {
         $this->ensureTeacher($teacher);
 
-        // تحديث جميع الحقول ما عدا كلمة المرور
         $teacher->fill(
             collect($data)->except('password')->toArray()
         );
 
-        // تحديث كلمة المرور فقط عند إرسالها
         if (!empty($data['password'])) {
             $teacher->password = Hash::make($data['password']);
         }
