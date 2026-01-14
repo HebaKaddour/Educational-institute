@@ -18,9 +18,12 @@ return new class extends Migration
           $table->string('student_mobile')->nullable();
           $table->string('guardian_mobile')->nullable();
           $table->integer('age');
+          $table->string('section');
            $table->enum('gender', ['ذكر', 'انثى']);
           $table->string('school');
-           $table->string('grade')->nullable();
+            $table->enum('status', ['نشط', 'منسحب'])
+        ->default('نشط');
+         $table->string('grade')->nullable(); //الصف
 
     $table->timestamps();
         });

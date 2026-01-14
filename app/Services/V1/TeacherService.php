@@ -47,6 +47,7 @@ public function updateTeacher(User $teacher, array $data): User
 
         return $teacher;
     }
+    
     public function deleteTeacher(User $teacher): void
     {
         $this->ensureTeacher($teacher);

@@ -15,19 +15,19 @@ return new class extends Migration
              $table->id();
              $table->foreignId('student_id')
         ->constrained()
-        ->cascadeOnDelete()->unique();;
-
-    $table->foreignId('subject_id')
-        ->constrained()
-        ->cascadeOnDelete()->unique();
-        $table->date('start_date');
+        ->cascadeOnDelete();
+    $table->date('start_date');
     $table->date('end_date');
-
-    $table->decimal('fee', 8, 2);
-    $table->decimal('discount', 8, 2)->default(0);
+    $table->decimal('monthly_fee', 8, 2);
+     $table->decimal('total_fee', 8, 2);
+     $table->decimal('net_fee', 8, 2);
+    $table->integer('month_number');
+    $table->decimal('discount_percentage', 8, 2)->default(0);
+    $table->decimal('discount_amount', 8, 2)->default(0);
     $table->decimal('paid_amount', 8, 2)->default(0);
-            $table->timestamps();
-        });
+    $table->enum('status', ['ساري', 'منتهي', 'منتهي قريبا'])->default('ساري');
+    $table->timestamps();
+     });
     }
 
     /**

@@ -5,19 +5,18 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 
-class EvaluationType extends Model
+class workingDay extends Model
 {
     use HasFactory;
 
     protected $fillable = [
-        'name',
-        'label',
+        'day_name',
+        'gender',
     ];
 
-    public function subjectEvaluationSettings()
+    public function sessions()
     {
-        return $this->hasMany(SubjectEvaluationSetting::class);
+        return $this->hasMany(Session::class);
     }
-
 
 }

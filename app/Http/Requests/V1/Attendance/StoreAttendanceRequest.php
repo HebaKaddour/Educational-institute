@@ -22,11 +22,13 @@ class StoreAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'student_id' => ['required', 'exists:students,id'],
-            'subject_id' => ['required', 'exists:subjects,id'],
-            'week' => ['required', 'integer', 'min:1', 'max:36'],
-            'day' => ['required', 'in:السبت,الأحد,الاثنين,الثلاثاء,الأربعاء,الخميس'],
-            'status' => ['required', 'in:غياب,حضور'],
+                'date' => 'required|date',
+                'week' => 'required|integer|min:1|max:36',
+                'day'  => 'required|string',
+                'subject_id' => 'sometimes|exists:subjects,id',
+                'students' => 'required|array',
+                'students.*.student_id' => 'required|exists:students,id',
+                'students.*.status' => 'required|in:حضور,غياب,بعذر',
         ];
     }
 

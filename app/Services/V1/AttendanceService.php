@@ -4,92 +4,105 @@ namespace App\Services\V1;
 use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Attendance;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Auth\Access\AuthorizationException;
 
 
 class AttendanceService
 {
-public function create(array $data)
+   public function storeDailyAttendance(array $data): void
     {
-        // check if the user is authorized to manage attendance for the subject
-        if (
-                auth()->user()->hasRole('teacher') &&! auth()->user()->subjects()
-        ->where('subjects.id', $data['subject_id'])->exists()
-        ) {
-            throw new AuthorizationException('غير مصرح لك بإدارة حضور هذا المقرر الدراسي');
+        $user = auth()->user();
+
+       if (!empty($data['subject_id'])) {
+
+            $subject = Subject::findOrFail($data['subject_id']);
+
+            if (
+                $user->hasRole('teacher') &&
+                $subject->teacher_id !== $user->id
+            ) {
+                throw new AuthorizationException(
+                    'غير مصرح لك بإدارة حضور هذه المادة'
+                );
+            }
         }
 
-        // Create or update attendance record
-        return Attendance::updateOrCreate(
-            [
-                'student_id' => $data['student_id'],
-                'subject_id' => $data['subject_id'],
-                'week' => $data['week'],
-                'day' => $data['day'],
-            ],
-            [
-                'status' => $data['status']
-            ]
-        );
-    }
-public function list(array $filters)
-{
-    $query = Attendance::query()
-        ->with([
-            'student:id,full_name',
-            'subject:id,name'
-        ]);
+        DB::transaction(function () use ($data) {
+            foreach ($data['students'] as $item) {
+                Attendance::updateOrCreate(
+                    [
+                        'student_id'      => $item['student_id'],
+                        'date' => $data['date'],
+                         'subject_id' => $data['subject_id'] ?? null,
+                    ],
+                    [
 
-    if (!empty($filters['student_id'])) {
-        $query->where('student_id', $filters['student_id']);
+                        'week'   => $data['week'],
+                        'day'    => $data['day'],
+                        'status' => $item['status'],
+                    ]
+                );
+            }
+        });
+
     }
 
-    if (!empty($filters['subject_id'])) {
-        $query->where('subject_id', $filters['subject_id']);
-    }
+// Get daily attendance report
+public function list(array $filters = []): Collection
+    {
+        $query = Attendance::query()
+            ->with([
+                'student:id,full_name,gender,grade',
+                'subject:id,name'
+            ]);
 
-    if (!empty($filters['week'])) {
-        $query->where('week', $filters['week']);
-    }
 
-    if (!empty($filters['day'])) {
-        $query->where('day', $filters['day']);
-    }
+        if (array_key_exists('subject_id', $filters)) {
+            $filters['subject_id'] === null
+                ? $query->whereNull('subject_id')
+                : $query->where('subject_id', $filters['subject_id']);
+        }
 
-    if (!empty($filters['status'])) {
-        $query->where('status', $filters['status']);
-    }
 
-    return $query
-        ->orderBy('week', 'desc')
-        ->orderBy('day')
-        ->get();
-
+        if (!empty($filters['date'])) {
+            $query->whereDate('date', $filters['date']);
+        }
         if (!empty($filters['week'])) {
-        return $this->groupByWeek($attendances);
+            $query->where('week', $filters['week']);
+        }
+        if (!empty($filters['grade'])) {
+            $query->whereHas('student', fn($q) => $q->where('grade', $filters['grade']));
+        }
+        if (!empty($filters['gender'])) {
+            $query->whereHas('student', fn($q) => $q->where('gender', $filters['gender']));
+        }
+
+
+        $attendances = $query->get()->sortBy([
+            fn($a, $b) => $a->student->grade <=> $b->student->grade,
+            fn($a, $b) => $a->student->gender <=> $b->student->gender,
+            fn($a, $b) => $a->student->full_name <=> $b->student->full_name,
+        ])->values();
+
+        return $attendances;
     }
-    return $attendances;
-}
 
-private function groupByWeek($attendances)
-{
-    return $attendances
-        ->groupBy('week')
-        ->map(function ($weekAttendances, $weekNumber) {
 
-            $first = $weekAttendances->first();
+    public function statistics(array $filters = []): array
+    {
+        $attendances = $this->list($filters);
 
-            return [
-                'week' => $weekNumber,
-                'student' => $first->student,
-                'subject' => $first->subject,
-                'days' => $weekAttendances->map(fn ($a) => [
-                    'day' => $a->day,
-                    'status' => $a->status,
-                ])->values()
-            ];
-        })
-        ->values();
-}
+        $total = $attendances->count();
+
+        return [
+            'total' => $total,
+            'present' => $attendances->where('status', 'حضور')->count(),
+            'absent' => $attendances->where('status', 'غياب')->count(),
+            'excused' => $attendances->where('status', 'بعذر')->count(),
+            'attendance_rate' => $total ? round(($attendances->where('status', 'حضور')->count() / $total) * 100, 2) : 0,
+        ];
+    }
 
 }

@@ -13,12 +13,10 @@ return new class extends Migration
     {
         Schema::create('evaluation_types', function (Blueprint $table) {
             $table->id();
-            $table->string('name'); // quiz, exam, homework
-            $table->string('label'); // اختبار جزئي، اختبار شامل، واجب
-            $table->integer('max_score')->nullable(); // null للواجب
-            $table->boolean('uses_score')->default(true);
-            $table->boolean('uses_status')->default(false);
+            $table->string('name')->unique(); // technical name (slug)
+            $table->string('label');          // display name
             $table->timestamps();
+
         });
     }
 

@@ -20,6 +20,7 @@ class EvaluationTypeSeeder extends Seeder
         'max_score' => 10,
         'uses_score' => true,
         'uses_status' => false,
+        'max_count' => 50,
     ],
     [
         'name' => 'exam',
@@ -27,6 +28,7 @@ class EvaluationTypeSeeder extends Seeder
         'max_score' => 100,
         'uses_score' => true,
         'uses_status' => false,
+        'max_count' => 10,
     ],
     [
         'name' => 'homework',
@@ -34,6 +36,7 @@ class EvaluationTypeSeeder extends Seeder
         'max_score' => null,
         'uses_score' => false,
         'uses_status' => true,
+        'max_count' => 144,
     ],
         ]);
     }

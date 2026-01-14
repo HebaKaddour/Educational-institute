@@ -2,11 +2,16 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Api\V1\authController;
+use App\Http\Controllers\Api\V1\paymentController;
 use App\Http\Controllers\Api\V1\StudentController;
 use App\Http\Controllers\Api\V1\SubjectController;
 use App\Http\Controllers\Api\V1\TeacherController;
 use App\Http\Controllers\Api\V1\AttendanceController;
-use App\Http\Controllers\Api\V1\EvaluationController;
+use App\Http\Controllers\Api\V1\SettingsSchedulerController;
+use App\Http\Controllers\Api\V1\Reports\StudentReportController;
+use App\Http\Controllers\Api\V1\Evaluations\EvaluationTypeController;
+use App\Http\Controllers\Api\V1\Evaluations\StudentEvaluationsController;
+use App\Http\Controllers\Api\V1\Evaluations\SubjectEvaluationSettingController;
 
 Route::prefix('V1')->group(function () {
 // Auth
@@ -17,11 +22,26 @@ Route::prefix('V1')->group(function () {
      Route::post('logout', [authController::class, 'logout']);
      Route::post('change-password', [authController::class, 'changePassword']);
 
-   // Teacher only store and update attendances/evaluations
-    Route::middleware(['role:teacher'])->group(function () {
-        Route::post('teacher/attendances', [AttendanceController::class, 'store']);
-        Route::patch('teacher/attendances/{attendance}', [AttendanceController::class, 'update']);
-        Route::post('teacher/evaluations', [EvaluationController::class, 'store']);
+   // Teacher and admin manage attendances/Settings Subject Evaluation
+    Route::middleware(['role:teacher|admin'])->group(function () {
+
+        // attendance
+       Route::get('attendance/daily', [AttendanceController::class, 'index']);
+       Route::post('attendance/daily', [AttendanceController::class, 'store']);
+
+         // Settings Subject Evaluation
+        Route::post('subjects/{subject}/evaluation-settings', [SubjectEvaluationSettingController::class, 'store']);
+        Route::get('subjects/{subject}/evaluation-settings', [SubjectEvaluationSettingController::class, 'index']);
+        Route::put('subject/evaluation-settings/{subjectEvaluationSetting}',[SubjectEvaluationSettingController::class, 'update']);
+
+        Route::delete('subject/evaluation-settings/{subjectEvaluationSetting}',[SubjectEvaluationSettingController::class, 'destroy']);
+
+
+        // Student Evaluations
+       Route::post('students/evaluations', [StudentEvaluationsController::class, 'store']);
+       Route::get('grades', [StudentEvaluationsController::class, 'allGrades']);
+       Route::put('evaluations/{evaluation}', [StudentEvaluationsController::class, 'update']);
+       Route::delete('evaluations/{evaluation}', [StudentEvaluationsController::class, 'deleteGrades']);
     });
         // Admin only
         Route::middleware('role:admin')->group(function () {
@@ -30,8 +50,42 @@ Route::prefix('V1')->group(function () {
              Route::get('students/search', [StudentController::class, 'search']);
             Route::apiResource('students', StudentController::class);
             Route::get('admin/attendances', [AttendanceController::class, 'index']);
-            Route::patch('subscriptions/{subscription_id}/pay',[StudentController::class, 'pay']);
+
+
+           Route::patch('update/subscriptions/{subscription}',
+            [StudentController::class, 'updateStudentSubscription']
+        );
+            Route::patch('students/{student}/change-status', [StudentController::class, 'changeStatus']);
             Route::post('students/{student}/subscriptions',[StudentController::class, 'addSubscription']);
+
+            Route::post(
+    '/subscriptions/{subscription}/payments',
+    [paymentController::class, 'store']
+);
+
+     Route::get(
+    '/subscriptions/{subscription}/monthly-payments',
+    [paymentController::class, 'monthlyPayments']
+);
+
+    //settings scheduler
+    Route::post('settings/working-days', [SettingsSchedulerController::class, 'storeWorkingDay']);
+    Route::post('settings/working-days/{workingDay}/sessions',[SettingsSchedulerController::class, 'storeSession']);
+    Route::get('settings/working-days', [SettingsSchedulerController::class, 'index']);
+    Route::get('settings/schedule/',[SettingsSchedulerController::class, 'getScheduleByGender']);
+
+
+    // settings Evaluations Types
+     Route::get('settings/evaluation-types', [EvaluationTypeController::class, 'index']);
+    Route::post('settings/evaluation-types', [EvaluationTypeController::class, 'store']);
+    Route::put('settings/evaluation-types/{evaluationType}', [EvaluationTypeController::class, 'update']);
+    Route::delete('settings/evaluation-types/{evaluationType}', [EvaluationTypeController::class, 'destroy']);
+
+
+
+    // Reports
+      Route::get('reports/students', [StudentReportController::class, 'index']);
+      Route::get('reports/student/pdf', [StudentReportController::class, 'exportPdf']);
+        });
     });
     });
-});

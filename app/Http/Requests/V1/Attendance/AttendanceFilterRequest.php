@@ -21,31 +21,34 @@ class AttendanceFilterRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'student_id' => 'sometimes|exists:students,id',
-            'subject_id' => 'sometimes|exists:subjects,id',
-            'week' => 'sometimes|integer|min:1|max:36',
-            'status' => 'sometimes|in:غياب,حضور,excused',
+                'date' => 'sometimes|date',
+                'gender'  => 'sometimes|in:ذكر,انثى',
+                'grade'   => 'sometimes|string',
+                'section' => 'sometimes|string',
+                'subject_id' => 'sometimes|exists:subjects,id',
         ];
     }
 
     public function attributes()
     {
         return [
-            'student_id' => 'معرف الطالب',
-            'subject_id' => 'معرف المقرر الدراسي',
-            'week' => 'رقم الأسبوع',
-            'status' => 'حالة الحضور',
+            'date' => 'التاريخ',
+            'gender'  => 'الجنس',
+            'grade'   => 'الصف',
+            'section' => 'الشعبة',
         ];
     }
 
     public function messages()
     {
         return[
-            'exists' => 'القيمة المحددة لـ :attribute غير موجودة في النظام.',
-            'integer' => 'يجب أن يكون :attribute رقمًا صحيحًا.',
-            'min' => 'يجب أن تكون قيمة :attribute على الأقل :min.',
-            'max' => 'يجب ألا تتجاوز قيمة :attribute :max.',
-            'in' => 'قيمة :attribute غير صالحة. القيم المسموح بها هي: :values.',
+            'date.required' => 'التاريخ مطلوب',
+            'date.date' => 'التاريخ غير صالح',
+            'gender.required' => 'الجنس مطلوب',
+            'gender.in' => 'الجنس المختار غير صالح',
+            'grade.required' => 'الصف مطلوب',
+            'section.string' => 'الشعبة غير صالحة',
+
         ];
     }
 }

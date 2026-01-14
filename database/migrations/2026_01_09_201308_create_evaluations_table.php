@@ -13,26 +13,21 @@ return new class extends Migration
     {
         Schema::create('evaluations', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('student_id')->constrained()->cascadeOnDelete();
-    $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
-    $table->foreignId('teacher_id')->constrained('users')->cascadeOnDelete();
-    $table->foreignId('evaluation_type_id')->constrained()->cascadeOnDelete();
+                        $table->foreignId('student_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('teacher_id')->constrained('users')->cascadeOnDelete();
+            $table->foreignId('evaluation_type_id')->constrained()->cascadeOnDelete();
+            $table->date('evaluation_date');
+            $table->unsignedSmallInteger('evaluation_number')->nullable();
+            $table->integer('score');
 
-    $table->integer('score')->nullable();
-    $table->enum('status', ['completed', 'not_completed'])->nullable();
-
-    $table->unsignedTinyInteger('week')->nullable();
-    $table->date('date');
-
-    $table->timestamps();
-
-    $table->unique([
+            $table->unique([
         'student_id',
         'subject_id',
         'evaluation_type_id',
-        'week',
-        'date'
+        'evaluation_number'
     ], 'unique_student_evaluation');
+            $table->timestamps();
         });
     }
 

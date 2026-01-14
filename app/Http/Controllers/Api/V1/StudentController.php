@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Student;
 use App\Models\Subscription;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Services\V1\StudentService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Students\StoreStudentRequest;
@@ -11,6 +13,7 @@ use App\Http\Requests\V1\Students\SearchStudentRequest;
 use App\Http\Requests\V1\Students\UpdateStudentRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Requests\V1\Students\AddSubscriptionRequest;
+use App\Http\Requests\V1\Students\UpdateStudentSubscriptionRequest;
 use App\Http\Requests\V1\Students\UpdateSubscriptionStudentRequest;
 
 class StudentController extends Controller
@@ -50,11 +53,43 @@ public function search(SearchStudentRequest $request)
         }
     }
 
-    public function store(StoreStudentRequest $request)
+public function store(StoreStudentRequest $request)
     {
-        $student = $this->studentService->createStudentWithSubscriptions($request->validated());
+        // بيانات الطالب
+        $studentData = $request->only([
+            'full_name',
+            'identification_number',
+            'age',
+            'gender',
+            'school',
+            'grade',
+            'section'
+        ]);
 
-        return self::success($student, 'تم إنشاء الطالب والاشتراكات بنجاح', 201);
+        // بيانات الاشتراك
+        $subscriptionData = $request->validatedSubscription();
+
+        $student = $this->studentService->createStudentWithSubscription($studentData, $subscriptionData);
+
+    return self::success($student, 'تم إنشاء الطالب والاشتراك بنجاح', 201);
+}
+
+
+public function updateStudentSubscription(UpdateStudentSubscriptionRequest $request, Subscription $subscription)
+{
+    $validated = $request->validated();
+
+    $student = $this->studentService->updateStudentWithSubscription($subscription, $validated);
+    return self::success($student, 'تم تعديل بيانات الطالب والاشتراك بنجاح', 200);
+}
+
+
+//
+public function changeStatus(Student $student)
+    {
+        $student = $this->studentService->withdrawStudent($student);
+        return self::success($student, 'تم تغيير حالة الطالب إلى منسحب بنجاح', 200);
+
     }
 
     public function pay(UpdateSubscriptionStudentRequest $request, $subscription_id)

@@ -22,25 +22,32 @@ class StoreStudentRequest extends FormRequest
 public function rules(): array
     {
         return [
-            // بيانات الطالب
+             // student
             'full_name' => 'required|string|max:255',
             'identification_number' => 'required|numeric|unique:students,identification_number',
-            'student_mobile' => 'nullable|string|max:20',
-            'guardian_mobile' => 'nullable|string|max:20',
             'age' => 'required|integer|min:3',
             'gender' => 'required|in:ذكر,انثى',
             'school' => 'required|string|max:255',
             'grade' => 'nullable|string|max:50',
+            'section' => 'required|string|max:50',
+            'student_mobile' => 'required|string|max:20',
+            'guardian_mobile' => 'required|string|max:20',
 
-            // الاشتراكات متعددة
-            'subscriptions' => 'required|array|min:1',
-            'subscriptions.*.subject_id' => 'required|exists:subjects,id',
-            'subscriptions.*.start_date' => 'required|date',
-            'subscriptions.*.end_date' => 'required|date|after_or_equal:subscriptions.*.start_date',
-            'subscriptions.*.fee' => 'required|numeric|min:0',
-            'subscriptions.*.discount' => 'nullable|numeric|min:0',
-            'subscriptions.*.paid_amount' => 'nullable|numeric|min:0',
+            // subscription
+            'subscription.month_number' => 'required|integer|min:1',
+            'subscription.start_date' => 'required|date',
+            'subscription.monthly_fee' => 'required|numeric|min:0',
+            'subscription.discount_percentage' => 'nullable|numeric|min:0|max:100',
+           // 'subscription.paid_amount' => 'nullable|numeric|min:0',
         ];
+    }
+
+
+    public function validatedSubscription(): array
+    {
+        $subscription = $this->input('subscription', []);
+        $subscription['discount_percentage'] = $subscription['discount_percentage'] ?? 0;
+        return $subscription;
     }
         public function attributes(): array
     {
@@ -55,12 +62,14 @@ public function rules(): array
             'grade' => 'الصف',
             'student_mobile' => 'موبايل الطالب',
             'guardian_mobile' => 'موبايل ولي الأمر',
-            'subscriptions.*.subject_id' => 'المادة',
-            'subscriptions.*.fee' => 'الرسوم',
-            'subscriptions.*.discount' => 'الخصم',
-            'subscriptions.*.paid_amount' => 'المبلغ المدفوع',
-            'subscriptions.*.start_date' => 'تاريخ البداية',
-            'subscriptions.*.end_date' => 'تاريخ النهاية',
+            'month_number' => 'عدد الأشهر',
+           // 'subscriptions.*.subject_id' => 'المادة',
+            'monthly_fee' => 'الرسوم الشهرية',
+            'discount' => 'الخصم',
+            'paid_amount' => 'المبلغ المدفوع',
+           //'start_date' => 'تاريخ البداية',
+            //'end_date' => 'تاريخ النهاية',
+            'section' => 'الشعية الدراسية',
         ];
     }
 
@@ -68,18 +77,25 @@ public function rules(): array
     {
         return [
             'full_name.required' => 'الاسم الكامل مطلوب',
-            'identification.required' => 'رقم الهوية مطلوب',
+            'identification_number.required' => 'رقم الهوية مطلوب',
             'identification_number.unique' => 'رقم الهوية مستخدم مسبقًا',
             'age.required' => 'العمر مطلوب',
             'gender.required' => 'الجنس مطلوب',
             'school.required' => 'المدرسة مطلوبة',
-            'subscriptions.required' => 'يجب إضافة اشتراك واحد على الأقل',
-            'subscriptions.*.subject_id.exists' => 'المادة المختارة غير موجودة',
-            'subscriptions.*.subject_id.required' => 'المادة مطلوبة',
-            'subscriptions.*.start_date.required' => 'تاريخ البداية مطلوب',
-            'subscriptions.*.end_date.required' => 'تاريخ النهاية مطلوب',
-            'subscriptions.*.end_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو مساوي لتاريخ البداية',
-            'subscriptions.*.fee.required' => 'الرسوم مطلوبة لكل مادة',
+            'subscription.month_number.required' => 'عدد الأشهر مطلوب',
+            'student_mobile.required' => 'موبايل الطالب مطلوب',
+            'guardian_mobile.required' => 'موبايل ولي الأمر مطلوب',
+            //'subscriptions.required' => 'يجب إضافة اشتراك واحد على الأقل',
+            //'subscriptions.*.subject_id.exists' => 'المادة المختارة غير موجودة',
+            //'subscriptions.*.subject_id.required' => 'المادة مطلوبة',
+            'subscription.start_date.required' => 'تاريخ البداية مطلوب',
+            //'subscriptions.*.end_date.required' => 'تاريخ النهاية مطلوب',
+            //'subscriptions.*.end_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو مساوي لتاريخ البداية',
+            'subscription.monthly_fee.required' => 'الرسوم مطلوبة  ',
+            'subscription.discount_percentage.min' => 'الخصم لا يمكن أن يكون أقل من 0',
+            'subscription.discount_percentage.max' => 'الخصم لا يمكن أن يكون أكثر من 100',
+           // 'subscription.paid_amount.min' => 'المبلغ المدفوع لا يمكن
+            'section.required' => 'الشعبة الدراسية مطلوب',
         ];
     }
 }

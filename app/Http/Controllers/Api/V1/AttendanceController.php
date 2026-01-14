@@ -21,7 +21,7 @@ class AttendanceController extends Controller
     // Teacher
     public function store(StoreAttendanceRequest $request)
     {
-        $attendance = $this->attendanceService->create($request->validated());
+        $attendance = $this->attendanceService->storeDailyAttendance($request->validated());
         return self::success($attendance, 'تم تسجيل الحضور بنجاح', 201);
 
     }
@@ -29,10 +29,10 @@ class AttendanceController extends Controller
 
  public function index(AttendanceFilterRequest $request)
     {
-       $attendances = $this->attendanceService->list(
+    $items = $this->attendanceService->list(
         $request->validated()
     );
 
-    return AttendanceResource::collection($attendances);
+    return AttendanceResource::collection($items);
     }
 }

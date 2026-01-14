@@ -15,6 +15,11 @@ class Subject extends Model
     return $this->belongsTo(User::class, 'teacher_id');
     }
 
+    public function evaluationSettings()
+    {
+        return $this->hasMany(SubjectEvaluationSetting::class);
+    }
+
     public function students() {
         return $this->belongsToMany(Student::class, 'student_subjects')
         ->withPivot(['start_date', 'end_date']);;

@@ -11,8 +11,12 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('subscriptions', function (Blueprint $table) {
-            $table->decimal('remaining_amount', 8, 2)->default(0);
+        Schema::create('working_days', function (Blueprint $table) {
+            $table->id();
+            $table->string('day_name')->unique();
+            $table->enum('gender', ['ذكور', 'اناث']);
+            $table->unique(['day_name', 'gender']);
+            $table->timestamps();
         });
     }
 
@@ -21,8 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('subscriptions', function (Blueprint $table) {
-            //
-        });
+        Schema::dropIfExists('working_days');
     }
 };
