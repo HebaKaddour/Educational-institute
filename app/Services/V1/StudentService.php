@@ -1,44 +1,54 @@
 <?php
 namespace App\Services\V1;
 
+use Mpdf\Tag\S;
 use Carbon\Carbon;
 use App\Models\Student;
 use App\Models\Subscription;
 use Illuminate\Support\Facades\DB;
+use App\Http\Resources\StudentResource;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use Mpdf\Tag\S;
 
 class StudentService {
 
     //get all students
-    public function getAllStudents()
-    {
-            $students = Student::all();
-    $count = Student::count(); // هذا يجلب عدد الطلاب
+public function getAllStudents()
+{
+    // جلب جميع الطلاب مع الاشتراكات
+
+    $students = Student::with('subscriptions')->get();
 
     return [
-        'students' => $students,
-        'count' => $count,
+        'count' => $students->count(),
+        'students' => StudentResource::collection($students),
     ];
-    }
-
+}
     //get one student
-    public function getStudentWithSubscriptions(Student $student): Student
+ public function getStudentWithSubscriptions(Student $student): array
     {
-        return Student::findOrFail($student->id);
+        $student = Student::with('subscriptions')->findOrFail($student->id);
+         return [
+            'student' => new StudentResource($student)
+        ];
     }
 
 
 public function searchStudents(string $query)
 {
     return Student::query()
-        ->where('full_name', 'LIKE', "%{$query}%")
+        ->where('full_name', 'LIKE', "{$query}%")
         ->select([
             'id',
             'full_name',
             'student_mobile',
-            'guardian_mobile'
+            'guardian_mobile',
+            'identification_number',
+            'grade',
+            'section',
+            'status',
+            'gender',
+            'school',
         ])
         ->limit(20)
         ->get();
@@ -188,6 +198,9 @@ public function updateSubscription(Subscription $subscription, array $data): Sub
             'gender'           => $data['gender']           ?? $student->gender,
             'school'           => $data['school']           ?? $student->school,
             'grade'            => $data['grade']            ?? $student->grade,
+            'student_mobile'   => $data['student_mobile']   ?? $student->student_mobile,
+            'guardian_mobile'  => $data['guardian_mobile']  ?? $student->guardian_mobile,
+            'section'          => $data['section']          ?? $student->section,
             'student_mobile'   => $data['student_mobile']   ?? $student->student_mobile,
             'guardian_mobile'  => $data['guardian_mobile']  ?? $student->guardian_mobile,
         ]);

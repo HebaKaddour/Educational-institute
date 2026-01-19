@@ -26,7 +26,7 @@ Route::prefix('V1')->group(function () {
     Route::middleware(['role:teacher|admin'])->group(function () {
 
         // attendance
-       Route::get('attendance/daily', [AttendanceController::class, 'index']);
+       Route::get('attendance/daily', [AttendanceController::class, 'daily']);
        Route::post('attendance/daily', [AttendanceController::class, 'store']);
 
          // Settings Subject Evaluation
@@ -49,6 +49,7 @@ Route::prefix('V1')->group(function () {
             Route::apiResource('subjects', SubjectController::class);
              Route::get('students/search', [StudentController::class, 'search']);
             Route::apiResource('students', StudentController::class);
+            Route::patch('/students-profile/{student}', [StudentController::class, 'updateProfile']);
             Route::get('admin/attendances', [AttendanceController::class, 'index']);
 
 

@@ -13,6 +13,7 @@ use App\Http\Requests\V1\Students\SearchStudentRequest;
 use App\Http\Requests\V1\Students\UpdateStudentRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use App\Http\Requests\V1\Students\AddSubscriptionRequest;
+use App\Http\Requests\V1\Students\UpdateStudentProfileRequest;
 use App\Http\Requests\V1\Students\UpdateStudentSubscriptionRequest;
 use App\Http\Requests\V1\Students\UpdateSubscriptionStudentRequest;
 
@@ -130,11 +131,25 @@ public function changeStatus(Student $student)
     }
     public function destroy(Student $student)
     {
-        $this->studentService->deleteStudent($student);
 
-        return self::success(
-            null,
-            'تم حذف الطالب بنجاح'
+        $student->delete();
+        return self::success(null,
+            " تم حذف الطالب بنجاح : $student->full_name"
         );
     }
+
+    public function updateProfile(UpdateStudentProfileRequest $request,Student $student
+    ) {
+        $updatedStudent = $this->studentService->updateStudentProfile(
+            $student,
+            $request->validated()
+        );
+
+         return self::success(
+            $updatedStudent,
+            'تم تحديث ملف الطالب الشخصي بنجاح'
+        );
 }
+
+}
+

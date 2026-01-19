@@ -27,12 +27,12 @@ class AttendanceController extends Controller
     }
 
 
- public function index(AttendanceFilterRequest $request)
+ public function daily(AttendanceFilterRequest $request)
     {
-    $items = $this->attendanceService->list(
+    $items = $this->attendanceService->daily(
         $request->validated()
     );
 
-    return AttendanceResource::collection($items);
+    return response()->json($items);
     }
 }
