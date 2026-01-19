@@ -93,23 +93,7 @@ public function changeStatus(Student $student)
 
     }
 
-    public function pay(UpdateSubscriptionStudentRequest $request, $subscription_id)
- {
-
-         $subscription = Subscription::find($subscription_id);
-
-        if (!$subscription) {
-        throw \Illuminate\Validation\ValidationException::withMessages([
-            'الاشتراك' => ['الاشتراك غير موجود']
-        ]);
-    }
-
-    $updated = $this->studentService->paySubscription($subscription, $request->payment_amount);
-
-     return self::success($updated, 'تم تسجيل الدفعة بنجاح', 200);
-}
-
-     public function update(UpdateStudentRequest $request, Student $student)
+     public function update(UpdateStudentSubscriptionRequest $request, Student $student)
     {
     return self::success(
         $this->studentService->updateStudentProfile(
@@ -120,15 +104,7 @@ public function changeStatus(Student $student)
     );
 }
 
-    public function addSubscription(AddSubscriptionRequest $request,Student $student) {
-        $subscription = $this->studentService
-            ->addSubscription($student, $request->validated());
 
-        return self::success($subscription->load('subject.teacher:id,name'),
-            'تم إضافة المادة للطالب بنجاح',
-            201
-        );
-    }
     public function destroy(Student $student)
     {
 
