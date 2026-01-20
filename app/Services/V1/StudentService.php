@@ -24,10 +24,10 @@ public function getAllStudents()
         'students' => StudentResource::collection($students),
     ];
 }
-    //get one student
+    //get one student with his subscriptions and payments
  public function getStudentWithSubscriptions(Student $student): array
     {
-        $student = Student::with('subscriptions')->findOrFail($student->id);
+        $student = Student::with('subscriptions.payments')->findOrFail($student->id);
          return [
             'student' => new StudentResource($student)
         ];

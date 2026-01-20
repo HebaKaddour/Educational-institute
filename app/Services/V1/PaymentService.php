@@ -9,20 +9,11 @@ use Illuminate\Validation\ValidationException;
 
 class PaymentService
 {
- public function createPayment(
-        Subscription $subscription,
-        float $amount,
-        string $method,
-        Carbon $paidAt,
+ public function createPayment(Subscription $subscription,float $amount,string $method,Carbon $paidAt,
         ?string $note = null
     ): Payment {
 
-        if ($amount <= 0) {
-            throw ValidationException::withMessages([
-                'amount' => ['قيمة الدفعة يجب أن تكون أكبر من صفر']
-            ]);
-        }
-
+        $this->validatePaymentAmount($amount, $subscription);
         return DB::transaction(function () use ($subscription, $amount, $method, $paidAt, $note) {
 
             $payment = Payment::create([
@@ -33,8 +24,13 @@ class PaymentService
                 'note' => $note,
             ]);
 
-            $subscription->paid_amount += $amount;
-            $subscription->save();
+          $subscription->increment('paid_amount', $amount);
+
+
+        if ($subscription->isFullyPaid()) {
+           throw ValidationException::withMessages(
+             ['تم تسديد كامل الرسوم مسبقا']);
+        }
 
             $this->updateSubscriptionStatus($subscription);
 
@@ -97,4 +93,19 @@ class PaymentService
 
         return $monthlyPayments;
     }
+
+    private function validatePaymentAmount(float $amount, Subscription $subscription): void
+{
+    if ($amount <= 0) {
+        throw ValidationException::withMessages([
+            'amount' => ['قيمة الدفعة يجب أن تكون أكبر من صفر']
+        ]);
+    }
+
+    if ($amount > $subscription->remaining_amount) {
+        throw ValidationException::withMessages([
+            'amount' => ['قيمة الدفعة أكبر من المبلغ المتبقي على الطالب']
+        ]);
+    }
+}
 }

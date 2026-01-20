@@ -17,22 +17,17 @@ class paymentController extends Controller
      */
  public function store(StorePaymentRequest $request, Subscription $subscription, PaymentService $paymentService)
     {
-        $payment = $paymentService->createPayment(
-            $subscription,
-            $request->amount,
-            $request->method,
-            Carbon::parse($request->paid_at),
-            $request->note
+        $payment = $paymentService->createPayment($subscription,$request->amount,$request->method,Carbon::parse($request->paid_at),$request->note
         );
 
-        return response()->json([
-            'success' => true,
-            'message' => 'تم تسجيل الدفعة بنجاح',
-            'data' => [
-                'payment' => $payment,
-                'subscription' => $subscription->fresh()
-            ]
-        ], 201);
+        $data = [
+            'payment' => $payment,
+            'subscription' => $subscription->fresh()
+        ];
+        return self::success(
+            $data,
+            'تم تسجيل الدفعة بنجاح'
+        );
     }
 
     public function monthlyPayments(Subscription $subscription, PaymentService $paymentService)

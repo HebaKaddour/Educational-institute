@@ -20,6 +20,8 @@ class StudentResource extends JsonResource
             'identification_number' => $this->identification_number,
             'age' => $this->age,
             'gender' => $this->gender,
+            'student_mobile' => $this->student_mobile,
+            'guardian_mobile' => $this->guardian_mobile,
             'school' => $this->school,
             'grade' => $this->grade,
             'section' => $this->section,
