@@ -64,7 +64,9 @@ public function store(StoreStudentRequest $request)
             'gender',
             'school',
             'grade',
-            'section'
+            'section',
+            'student_mobile',
+            'guardian_mobile',
         ]);
 
         // بيانات الاشتراك
