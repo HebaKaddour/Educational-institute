@@ -19,10 +19,13 @@ class paymentController extends Controller
     {
         $payment = $paymentService->createPayment($subscription,$request->amount,$request->method,Carbon::parse($request->paid_at),$request->note
         );
-
+        $remaining_amount = $subscription->remaining_amount;
         $data = [
             'payment' => $payment,
-            'subscription' => $subscription->fresh()
+
+            'subscription' => $subscription->fresh(),
+
+            'remaining_amount' =>$remaining_amount,
         ];
         return self::success(
             $data,

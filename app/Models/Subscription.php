@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Subscription extends Model
 {
-    protected $appends = ['remaining_amount'];
+   // protected $appends = ['remaining_amount'];
     use HasFactory;
     protected $fillable = ['student_id','start_date',
     'total_fee','end_date','monthly_fee','discount_percentage','discount_amount','paid_amount',

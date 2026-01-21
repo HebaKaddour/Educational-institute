@@ -8,6 +8,7 @@ use App\Models\Subscription;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\StudentResource;
 use Illuminate\Validation\ValidationException;
+use App\Http\Resources\SubscriptionListResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class StudentService {
@@ -24,15 +25,40 @@ public function getAllStudents()
         'students' => StudentResource::collection($students),
     ];
 }
+
     //get one student with his subscriptions and payments
  public function getStudentWithSubscriptions(Student $student): array
     {
-        $student = Student::with('subscriptions.payments')->findOrFail($student->id);
+        $student = Student::with('subscriptions')
+        ->withSum('subscriptions', 'paid_amount')
+        ->withSum('subscriptions as total_net_fee', 'net_fee')
+        ->findOrFail($student->id);
          return [
             'student' => new StudentResource($student)
         ];
     }
+//get all student with subscriptions and payment details
+public function getAllStudentsWithDetails()
+{
+    $subscriptions = Subscription::query()
+        ->with([
+            'student:id,full_name'
+        ])
+        ->select([
+            'id',
+            'student_id',
+            'month_number',
+            'net_fee',
+            'paid_amount',
+            'start_date',
+            'end_date',
+            'status'
+        ])
+        ->latest()
+        ->paginate(20);
 
+    return SubscriptionListResource::collection($subscriptions);
+}
 
 public function searchStudents(string $query)
 {
@@ -125,7 +151,7 @@ public function updateStudentWithSubscription(Subscription $subscription, array 
     return DB::transaction(function () use ($subscription, $validated) {
 
         $studentData = collect($validated)
-            ->only(['full_name','identification_number','age','gender','school','grade','section'])
+            ->only(['full_name','identification_number','age','gender','school','grade','section','status','student_mobile','guardian_mobile'])
             ->toArray();
 
         // تحديث بيانات الطالب

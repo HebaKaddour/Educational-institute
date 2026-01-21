@@ -55,8 +55,8 @@ class StorePaymentRequest extends FormRequest
             'note.string' => 'حقل الملاحظة يجب أن يكون نصًا.',
             'note.max' => 'حقل الملاحظة لا يجب أن يتجاوز 500 حرف.',
             'amount.required' => 'حقل المبلغ مطلوب.',
-            'amount.numeric' => 'حقل المبلغ يجب أن يكون رقمًا.',
-            'amount.min' => 'حقل المبلغ يجب أن يكون على الأقل 0.',
+            'amount.numeric' => ' المبلغ يجب أن يكون رقم صحيح.',
+            'amount.min' => ' المبلغ المدفوع يجب أن يكون اكبر من 0.',
         ];
     }
 }

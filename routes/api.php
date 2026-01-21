@@ -49,6 +49,7 @@ Route::prefix('V1')->group(function () {
             Route::apiResource('subjects', SubjectController::class);
              Route::get('students/search', [StudentController::class, 'search']);
             Route::apiResource('students', StudentController::class);
+            Route::get('allSubscriptions/details',[StudentController::class,'allSubscriptions']);
             Route::patch('/students-profile/{student}', [StudentController::class, 'updateProfile']);
             Route::get('admin/attendances', [AttendanceController::class, 'index']);
 

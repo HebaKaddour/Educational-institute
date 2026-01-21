@@ -4,40 +4,43 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Student;
 use App\Models\Subscription;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Services\V1\StudentService;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\V1\Students\StoreStudentRequest;
 use App\Http\Requests\V1\Students\SearchStudentRequest;
-use App\Http\Requests\V1\Students\UpdateStudentRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
-use App\Http\Requests\V1\Students\AddSubscriptionRequest;
 use App\Http\Requests\V1\Students\UpdateStudentProfileRequest;
 use App\Http\Requests\V1\Students\UpdateStudentSubscriptionRequest;
-use App\Http\Requests\V1\Students\UpdateSubscriptionStudentRequest;
-
+/**
+ * StudentController
+ */
 class StudentController extends Controller
 {
     public function __construct(
         protected StudentService $studentService
     ) {}
-
+    /**
+     * Display a listing of the resource.
+     * @return \Illuminate\Http\Response
+     * @param  \App\Models\Student  $student
+     *
+      */
     public function index()
     {
-        return self::success(
-            $this->studentService->getAllStudents(),
-            'قائمة الطلاب'
-        );
+        return self::success($this->studentService->getAllStudents(),'قائمة الطلاب');
     }
 
-public function search(SearchStudentRequest $request)
-{
-    $students = $this->studentService
-        ->searchStudents($request->validated()['query']);
+    public function allSubscriptions(){
+        $subscription_deatils = $this->studentService->getAllStudentsWithDetails();
+        return self::success($subscription_deatils,'قائمة الاشتراكات',200);
 
-    return self::success($students, 'نتائج البحث');
-}
+    }
+
+    public function search(SearchStudentRequest $request)
+    {
+    $students = $this->studentService->searchStudents($request->validated()['query']);
+    return self::success($students,'نتائج البحث');
+    }
 
    public function show(Student $student)
     {

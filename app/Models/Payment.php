@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Payment extends Model
 {
+    //protected $appends = ['remaining_amount'];
     use HasFactory;
 
     protected $fillable = [

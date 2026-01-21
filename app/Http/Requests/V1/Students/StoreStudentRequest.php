@@ -38,7 +38,6 @@ public function rules(): array
             'subscription.start_date' => 'required|date',
             'subscription.monthly_fee' => 'required|numeric|min:0',
             'subscription.discount_percentage' => 'nullable|numeric|min:0|max:100',
-           // 'subscription.paid_amount' => 'nullable|numeric|min:0',
         ];
     }
 
@@ -63,12 +62,8 @@ public function rules(): array
             'student_mobile' => 'موبايل الطالب',
             'guardian_mobile' => 'موبايل ولي الأمر',
             'month_number' => 'عدد الأشهر',
-           // 'subscriptions.*.subject_id' => 'المادة',
             'monthly_fee' => 'الرسوم الشهرية',
             'discount' => 'الخصم',
-            'paid_amount' => 'المبلغ المدفوع',
-           //'start_date' => 'تاريخ البداية',
-            //'end_date' => 'تاريخ النهاية',
             'section' => 'الشعية الدراسية',
         ];
     }
@@ -85,16 +80,11 @@ public function rules(): array
             'subscription.month_number.required' => 'عدد الأشهر مطلوب',
             'student_mobile.required' => 'موبايل الطالب مطلوب',
             'guardian_mobile.required' => 'موبايل ولي الأمر مطلوب',
-            //'subscriptions.required' => 'يجب إضافة اشتراك واحد على الأقل',
-            //'subscriptions.*.subject_id.exists' => 'المادة المختارة غير موجودة',
-            //'subscriptions.*.subject_id.required' => 'المادة مطلوبة',
             'subscription.start_date.required' => 'تاريخ البداية مطلوب',
-            //'subscriptions.*.end_date.required' => 'تاريخ النهاية مطلوب',
-            //'subscriptions.*.end_date.after_or_equal' => 'تاريخ النهاية يجب أن يكون بعد أو مساوي لتاريخ البداية',
+            'subscription.start_date.date' => 'تاريخ البداية يجب أن يكون تاريخًا صحيحًا',
             'subscription.monthly_fee.required' => 'الرسوم مطلوبة  ',
             'subscription.discount_percentage.min' => 'الخصم لا يمكن أن يكون أقل من 0',
             'subscription.discount_percentage.max' => 'الخصم لا يمكن أن يكون أكثر من 100',
-           // 'subscription.paid_amount.min' => 'المبلغ المدفوع لا يمكن
             'section.required' => 'الشعبة الدراسية مطلوب',
         ];
     }
