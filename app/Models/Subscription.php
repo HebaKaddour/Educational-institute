@@ -39,6 +39,6 @@ public function getRemainingAmountAttribute() : float
 
       public function isFullyPaid(): bool
     {
-        return $this->remaining_amount <= 0;
+        return $this->remaining_amount <0;
     }
 }
