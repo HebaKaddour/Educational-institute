@@ -27,11 +27,6 @@ class PaymentService
           $subscription->increment('paid_amount', $amount);
 
 
-        if ($subscription->isFullyPaid()) {
-           throw ValidationException::withMessages(
-             ['تم تسديد كامل الرسوم مسبقا']);
-        }
-
             $this->updateSubscriptionStatus($subscription);
 
             return $payment;
@@ -96,6 +91,13 @@ class PaymentService
 
     private function validatePaymentAmount(float $amount, Subscription $subscription): void
 {
+    if ($subscription->paid_amount >= $subscription->net_fee) {
+        throw ValidationException::withMessages([
+            'تم تسديد كامل الرسوم مسبقا'
+        ]);
+    }
+
+
     if ($amount <= 0) {
         throw ValidationException::withMessages([
             'amount' => ['قيمة الدفعة يجب أن تكون أكبر من صفر']
