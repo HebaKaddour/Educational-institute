@@ -22,19 +22,37 @@ class UpdateAttendanceRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'status' => ['required', 'in:حضور,غياب'],
-        ];
+                'date' => 'sometimes|date',
+                'week' => 'sometimes|integer|min:1|max:36',
+                'day'  => 'sometimes|string',
+                'subject_id' => 'sometimes|exists:subjects,id',
+                'students' => 'required|array',
+                'students.*.student_id' => 'required|exists:students,id',
+                'students.*.status' => 'required|in:حضور,غياب,بعذر',        ];
     }
     public function attributes(): array
     {
         return [
+            'student_id' => 'الطالب',
+            'subject_id' => 'المادة',
+            'week' => 'الأسبوع',
+            'day' => 'اليوم',
             'status' => 'الحالة',
         ];
     }
-
     public function messages(): array
     {
         return [
+            'student_id.required' => 'الطالب مطلوب',
+            'student_id.exists' => 'الطالب المختار غير موجود',
+            'subject_id.required' => 'المادة مطلوبة',
+            'subject_id.exists' => 'المادة المختارة غير موجودة',
+            'week.required' => 'رقم الأسبوع مطلوب',
+            'week.integer' => 'رقم الأسبوع يجب أن يكون عددًا صحيحًا',
+            'week.min' => 'رقم الأسبوع يجب أن يكون على الأقل 1',
+            'week.max' => 'النظام مؤلف من 36 اسبوع فقط',
+            'day.required' => 'اليوم مطلوب',
+            'day.in' => 'اليوم المختار غير صالح',
             'status.required' => 'الحالة مطلوبة',
             'status.in' => 'الحالة المختارة غير صالحة',
         ];

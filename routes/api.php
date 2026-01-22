@@ -28,6 +28,7 @@ Route::prefix('V1')->group(function () {
         // attendance
        Route::get('attendance/daily', [AttendanceController::class, 'daily']);
        Route::post('attendance/daily', [AttendanceController::class, 'store']);
+        Route::put('/attendance/daily', [AttendanceController::class, 'updateDailyAttendance']);
 
          // Settings Subject Evaluation
         Route::post('subjects/{subject}/evaluation-settings', [SubjectEvaluationSettingController::class, 'store']);

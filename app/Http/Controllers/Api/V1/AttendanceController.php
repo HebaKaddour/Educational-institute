@@ -26,6 +26,11 @@ class AttendanceController extends Controller
 
     }
 
+    public function updateDailyAttendance(UpdateAttendanceRequest $request){
+        $updated_attendance = $this->attendanceService->storeDailyAttendance($request->validated());
+        return self::success($updated_attendance,'تم تحديث الحضور بنجاح',200);
+    }
+
 
  public function daily(AttendanceFilterRequest $request)
     {
