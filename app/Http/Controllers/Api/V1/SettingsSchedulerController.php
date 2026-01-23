@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api\V1;
 
+use App\Models\Session;
 use App\Models\workingDay;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Services\V1\SettingsSchedulerService;
-use App\Http\Requests\V1\Settings\StorePeriodRequest;
 use App\Http\Requests\V1\Settings\StoreSessionRequest;
 use App\Http\Requests\V1\Settings\StorescheduleRequest;
+use App\Http\Requests\V1\Settings\UpdateSessionRequest;
 
 class SettingsSchedulerController extends Controller
 {
@@ -81,4 +82,37 @@ class SettingsSchedulerController extends Controller
         201
     );
 }
+public function updateSession(UpdateSessionRequest $request, WorkingDay $workingDay, Session $session)
+{
+    if ($session->working_day_id !== $workingDay->id) {
+        return self::error(
+            'هذه الحصة لا تنتمي إلى يوم العمل المحدد',
+            403
+        );
+    }
+
+    // تحديث الحصة
+    $session->update($request->validated());
+
+    $session->load('workingDay');
+
+    return self::success(
+        [
+            'session' => [
+                'id'          => $session->id,
+                'name'        => $session->session_name,
+                'start_time'  => $session->start_time,
+                'end_time'    => $session->end_time,
+            ],
+            'working_day' => [
+                'id'       => $workingDay->id,
+                'day_name' => $workingDay->day_name,
+                'gender'   => $workingDay->gender,
+            ]
+        ],
+        'تم تعديل الحصة بنجاح',
+        200
+    );
+}
+
 }

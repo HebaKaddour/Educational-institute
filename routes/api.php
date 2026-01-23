@@ -74,6 +74,11 @@ Route::prefix('V1')->group(function () {
     //settings scheduler
     Route::post('settings/working-days', [SettingsSchedulerController::class, 'storeWorkingDay']);
     Route::post('settings/working-days/{workingDay}/sessions',[SettingsSchedulerController::class, 'storeSession']);
+    Route::put(
+    'working-days/{workingDay}/sessions/{session}',
+    [SettingsSchedulerController::class, 'updateSession']
+);
+
     Route::get('settings/working-days', [SettingsSchedulerController::class, 'index']);
     Route::get('settings/schedule/',[SettingsSchedulerController::class, 'getScheduleByGender']);
 
