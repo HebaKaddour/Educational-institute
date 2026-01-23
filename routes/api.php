@@ -76,8 +76,10 @@ Route::prefix('V1')->group(function () {
     Route::post('settings/working-days/{workingDay}/sessions',[SettingsSchedulerController::class, 'storeSession']);
     Route::put(
     'working-days/{workingDay}/sessions/{session}',
-    [SettingsSchedulerController::class, 'updateSession']
-);
+    [SettingsSchedulerController::class, 'updateSession']);
+    Route::delete('settings/working-days/{workingDay}',[SettingsSchedulerController::class,'deleteScheduler']);
+    Route::delete('settings/working-days/{workingDay}/sessions/{session}',[SettingsSchedulerController::class,'deleteSession']);
+
 
     Route::get('settings/working-days', [SettingsSchedulerController::class, 'index']);
     Route::get('settings/schedule/',[SettingsSchedulerController::class, 'getScheduleByGender']);

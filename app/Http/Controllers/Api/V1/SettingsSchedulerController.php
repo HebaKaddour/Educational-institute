@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Api\V1;
 use App\Models\Session;
 use App\Models\workingDay;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Controller;
 use App\Services\V1\SettingsSchedulerService;
+use Illuminate\Validation\ValidationException;
 use App\Http\Requests\V1\Settings\StoreSessionRequest;
 use App\Http\Requests\V1\Settings\StorescheduleRequest;
 use App\Http\Requests\V1\Settings\UpdateSessionRequest;
@@ -86,7 +88,7 @@ public function updateSession(UpdateSessionRequest $request, WorkingDay $working
 {
     if ($session->working_day_id !== $workingDay->id) {
         return self::error(
-            'هذه الحصة لا تنتمي إلى يوم العمل المحدد',
+            'هذه الحصة لا تنتمي إلى يوم الدوام المحدد',
             403
         );
     }
@@ -114,5 +116,25 @@ public function updateSession(UpdateSessionRequest $request, WorkingDay $working
         200
     );
 }
+public function deleteScheduler( WorkingDay $workingDay){
+
+    $workingDay->delete();
+    return self::success($workingDay,'تم حذف يوم الدوام بنجاح',200);
+
+}
+
+public function deleteSession(WorkingDay $workingDay, Session $session){
+    if ($session->working_day_id !== $workingDay->id) {
+        throw ValidationException::withMessages([
+            'session' => 'هذه الحصة لا تنتمي إلى يوم الدوام المحدد'
+        ]);
+    }
+
+    $session->delete();
+    return self::success($session,'تم حذف هذه الحصة بنجاح',200);
+
+
+}
+
 
 }
