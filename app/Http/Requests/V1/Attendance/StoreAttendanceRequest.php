@@ -24,7 +24,7 @@ class StoreAttendanceRequest extends FormRequest
         return [
                 'date' => 'required|date',
                 'week' => 'required|integer|min:1|max:36',
-                'day'  => 'required|string',
+                'day'  => 'required|string|in:السبت,الأحد,الاثنين,الثلاثاء,الأربعاء,الخميس',
                 'subject_id' => 'sometimes|exists:subjects,id',
                 'students' => 'required|array',
                 'students.*.student_id' => 'required|exists:students,id',

@@ -55,7 +55,31 @@ try {
         }
 
     }
+//update attendance
+public function updateAttendance(Attendance $attendance , array $data)
+{
+    $user = auth()->user();
+    if(!$user){
+         throw new AuthorizationException('User not authenticated.');
 
+    }
+    if (!empty($data['subject_id'])) {
+
+
+            $subject = Subject::findOrFail($data['subject_id']);
+
+            if (
+                $user->hasRole('teacher') &&
+                $subject->teacher_id !== $user->id
+            ) {
+                throw new AuthorizationException(
+                    'غير مصرح لك بتعديل حضور هذه المادة'
+                );
+            }
+        }
+                 $attendance->update($data);
+                 return $attendance;
+        }
 // Get daily attendance report
 
 public function daily(array $filters = []): Collection
@@ -112,4 +136,22 @@ public function daily(array $filters = []): Collection
         ];
     })->values();
 }
+
+public function deleteAttendance(Attendance $attendance): void
+{
+    $user = auth()->user();
+
+    if (
+        $user->hasRole('teacher') &&
+        $attendance->subject &&
+        $attendance->subject->teacher_id !== $user->id
+    ) {
+        throw new AuthorizationException(
+            'غير مصرح لك بحذف حضور هذه المادة'
+        );
+    }
+
+    $attendance->delete();
+}
+
 }

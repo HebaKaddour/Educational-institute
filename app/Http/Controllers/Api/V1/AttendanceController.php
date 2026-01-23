@@ -26,8 +26,8 @@ class AttendanceController extends Controller
 
     }
 
-    public function updateDailyAttendance(UpdateAttendanceRequest $request){
-        $updated_attendance = $this->attendanceService->storeDailyAttendance($request->validated());
+    public function updateDailyAttendance(UpdateAttendanceRequest $request , Attendance $attendance){
+        $updated_attendance = $this->attendanceService->updateAttendance($attendance ,$request->validated());
         return self::success($updated_attendance,'تم تحديث الحضور بنجاح',200);
     }
 
@@ -40,4 +40,15 @@ class AttendanceController extends Controller
 
     return response()->json($items);
     }
+
+    public function destroy(Attendance $attendance)
+{
+    $this->attendanceService->deleteAttendance($attendance);
+
+    return self::success(
+        null,
+        'تم حذف سجل الحضور بنجاح',
+        200
+    );
+}
 }

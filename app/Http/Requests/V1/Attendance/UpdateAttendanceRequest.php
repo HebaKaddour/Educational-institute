@@ -26,9 +26,8 @@ class UpdateAttendanceRequest extends FormRequest
                 'week' => 'sometimes|integer|min:1|max:36',
                 'day'  => 'sometimes|string',
                 'subject_id' => 'sometimes|exists:subjects,id',
-                'students' => 'required|array',
-                'students.*.student_id' => 'required|exists:students,id',
-                'students.*.status' => 'required|in:حضور,غياب,بعذر',        ];
+                'status' => 'required|in:حضور,غياب,بعذر',
+             ];
     }
     public function attributes(): array
     {
@@ -43,9 +42,6 @@ class UpdateAttendanceRequest extends FormRequest
     public function messages(): array
     {
         return [
-            'student_id.required' => 'الطالب مطلوب',
-            'student_id.exists' => 'الطالب المختار غير موجود',
-            'subject_id.required' => 'المادة مطلوبة',
             'subject_id.exists' => 'المادة المختارة غير موجودة',
             'week.required' => 'رقم الأسبوع مطلوب',
             'week.integer' => 'رقم الأسبوع يجب أن يكون عددًا صحيحًا',
