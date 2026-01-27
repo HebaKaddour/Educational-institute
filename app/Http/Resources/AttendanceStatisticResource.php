@@ -14,7 +14,7 @@ public function toArray($request)
             'section'    => $this->student->section ?? null,
             'attendance' => [
                 'status'        => $this->status,
-                'subject_id' => $this->subject->name,
+                'subject_name' => $this->subject->name,
                 'participation' => (bool) $this->participation,
             ],
         ];

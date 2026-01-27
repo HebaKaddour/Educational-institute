@@ -39,6 +39,7 @@ public function scopeFilter($query, array $filters)
 {
     return $this
         ->when($filters['date'] ?? null, fn($q) => $q->where('date', $filters['date']))
+        ->when($filters['subject_id'] ?? null, fn($q) => $q->where('subject_id', $filters['subject_id']))
         ->when($filters['day'] ?? null, fn($q) => $q->where('day', $filters['day']))
         ->when($filters['gender'] ?? null, fn($q) => $q->whereHas('student', fn($sq) => $sq->where('gender', $filters['gender'])))
         ->when($filters['grade'] ?? null, fn($q) => $q->whereHas('student', fn($sq) => $sq->where('grade', $filters['grade'])))

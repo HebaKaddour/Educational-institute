@@ -10,6 +10,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\AttendanceResource;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Auth\Access\AuthorizationException;
 
 
@@ -117,12 +118,13 @@ $user = auth()->user();
         'evaluations.evaluationType'
     ]);
 }
-    public function daily(array $filters): Collection
+    public function daily(array $filters): LengthAwarePaginator
     {
+        $perPage = $filters['per_page'] ?? 15;
     return Attendance::with(['student', 'subject'])
         ->filter($filters)
         ->orderBy('student_id')
-        ->get();
+         ->paginate($perPage);
 
     }
 

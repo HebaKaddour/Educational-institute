@@ -33,15 +33,23 @@ class AttendanceController extends Controller
         return self::success(new AttendanceResource($updated_attendance),'تم تحديث الحضور بنجاح',200);
     }
 
-
- public function daily(AttendanceFilterRequest $request)
-    {
-    $students = $this->attendanceService->daily($request->validated()
+public function daily(AttendanceFilterRequest $request)
+{
+    $attendances = $this->attendanceService->daily(
+        $request->validated()
     );
 
-           return self::success(AttendanceStatisticResource::collection($students),'تم جلب الحضور بنجاح',200);
+    // ✅ تحويل العناصر فقط إلى Resource بدون كسر pagination
+    $attendances->through(function ($item) {
+        return new AttendanceStatisticResource($item);
+    });
 
-    }
+    return self::paginated(
+        $attendances,
+        'تم جلب الحضور بنجاح',
+        200
+    );
+}
 
     public function destroy(Attendance $attendance)
 {
