@@ -19,7 +19,7 @@ return new class extends Migration
           $table->string('guardian_mobile')->nullable();
           $table->integer('age');
           $table->string('section');
-           $table->enum('gender', ['ذكر', 'انثى']);
+           $table->enum('gender', ['ذكر','انثى']);
           $table->string('school');
             $table->enum('status', ['نشط', 'منسحب'])
         ->default('نشط');

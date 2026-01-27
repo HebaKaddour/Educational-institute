@@ -26,7 +26,8 @@ class UpdateAttendanceRequest extends FormRequest
                 'week' => 'sometimes|integer|min:1|max:36',
                 'day'  => 'sometimes|string',
                 'subject_id' => 'sometimes|exists:subjects,id',
-                'status' => 'required|in:حضور,غياب,بعذر',
+                'status' => 'sometimes|in:حضور,غياب,بعذر',
+                'participation' => 'nullable|boolean',
              ];
     }
     public function attributes(): array

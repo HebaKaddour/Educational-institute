@@ -25,9 +25,8 @@ class AttendanceFilterRequest extends FormRequest
                 'gender'  => 'sometimes|in:ذكر,انثى',
                 'grade'   => 'sometimes|string',
                 'section' => 'sometimes|string|exists:students,section',
-                'subject_id' => 'sometimes|exists:subjects,id',
+                'subject_id' => 'sometimes|nullable|exists:subjects,id',
                 'day' => 'sometimes|in:السبت,الأحد,الاثنين,الثلاثاء,الأربعاء,الخميس',
-                'week' => 'sometimes|integer|min:1|max:36',
         ];
     }
 

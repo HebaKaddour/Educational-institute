@@ -2,24 +2,21 @@
 
 namespace App\Http\Resources;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\JsonResource;
 
 class AttendanceResource extends JsonResource
 {
-    /**
-     * Transform the resource into an array.
-     *
-     * @return array<string, mixed>
-     */
-public function toArray($request)
+    public function toArray($request)
     {
         return [
             'id' => $this->id,
-            'date' => $this->date->format('Y-m-d'),
+            'date' => $this->date->toDateString(),
             'week' => $this->week,
             'day' => $this->day,
             'status' => $this->status,
+            'participation' => (bool) $this->participation,
 
             'student' => [
                 'id' => $this->student->id,
@@ -36,11 +33,23 @@ public function toArray($request)
                 ];
             }),
 
-             'created_at' => $this->created_at?->toISOString(),
-            'updated_at' => $this->updated_at?->toISOString(),
+            'evaluations' => $this->whenLoaded('evaluations', function () {
+                return $this->evaluations
+                    ->filter(fn($eval) =>
+                        $eval->subject_id == $this->subject_id &&
+                        Carbon::parse($eval->evaluation_date)->toDateString() === Carbon::parse($this->date)->toDateString()
+                    )
+                    ->map(fn($eval) => [
+                        'id' => $eval->id,
+                        'type' => $eval->evaluationType->label ?? null,
+                        'score' => $eval->score,
+                        'date' => $eval->evaluation_date,
+                    ])
+                    ->values();
+            }),
+
+            'created_at' => $this->created_at?->toDateTimeString(),
+            'updated_at' => $this->updated_at?->toDateTimeString(),
         ];
     }
-
-
-
 }

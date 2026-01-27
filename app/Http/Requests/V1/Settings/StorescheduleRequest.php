@@ -25,7 +25,7 @@ class StorescheduleRequest extends FormRequest
         return [
            'days' => 'required|array',
            'days.*.day_name' => ['required', 'string', 'in:' . implode(',', array_column(SchedulerDay::cases(), 'value'))],
-           'days.*.gender' => 'required|in:ذكور,اناث',
+           'days.*.gender' => 'required|in:ذكر,انثى',
         ];
     }
 

@@ -17,6 +17,7 @@ class Attendance extends Model
         'week',
         'day',
         'status',
+        'participation'
     ];
 
     public function student() {
@@ -27,41 +28,25 @@ class Attendance extends Model
     {
         return $this->belongsTo(Subject::class);
     }
+ public function evaluations() {
+        return $this->hasMany(Evaluation::class, 'student_id', 'student_id')
+            ->with('evaluationType'); // Eager load نوع التقييم
+    }
 
     //scope for filtering
 
-
-public function scopeFilter(Builder $query, array $filters): Builder
+public function scopeFilter($query, array $filters)
 {
-    return $query
-        ->when(isset($filters['subject_id']), fn($q) =>
-            $filters['subject_id'] === null
-                ? $q->whereNull('subject_id')
-                : $q->where('subject_id', $filters['subject_id'])
-        )
-        ->when(!empty(trim($filters['date'] ?? '')), fn($q) =>
-            $q->whereDate('date', trim($filters['date']))
-        )
-        ->when(!empty(trim($filters['day'] ?? '')), fn($q) =>
-            $q->where('day', trim($filters['day']))
-        )
-        ->when(!empty(trim($filters['section'] ?? '')), fn($q) =>
-            $q->whereHas('student', fn($s) => $s->where('section', trim($filters['section'])))
-        )
-        ->when(!empty(trim($filters['week'] ?? '')), fn($q) =>
-            $q->where('week', trim($filters['week']))
-        )
-        ->when(!empty(trim($filters['grade'] ?? '')), fn($q) =>
-            $q->whereHas('student', fn($s) => $s->where('grade', trim($filters['grade'])))
-        )
-        ->when(!empty(trim($filters['gender'] ?? '')), fn($q) =>
-            $q->whereHas('student', fn($s) => $s->where('gender', trim($filters['gender'])))
-        );
+    return $this
+        ->when($filters['date'] ?? null, fn($q) => $q->where('date', $filters['date']))
+        ->when($filters['day'] ?? null, fn($q) => $q->where('day', $filters['day']))
+        ->when($filters['gender'] ?? null, fn($q) => $q->whereHas('student', fn($sq) => $sq->where('gender', $filters['gender'])))
+        ->when($filters['grade'] ?? null, fn($q) => $q->whereHas('student', fn($sq) => $sq->where('grade', $filters['grade'])))
+        ->when($filters['section'] ?? null, fn($q) => $q->whereHas('student', fn($sq) => $sq->where('section', $filters['section'])));
 }
 
 protected $casts = [
-    'start_date' => 'datetime',
-    'end_date' => 'datetime',
+    'date' => 'date',
 ];
 
 

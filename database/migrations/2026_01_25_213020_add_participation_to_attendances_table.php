@@ -11,12 +11,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('working_days', function (Blueprint $table) {
-            $table->id();
-            $table->string('day_name')->unique();
-            $table->enum('gender', ['ذكر','انثى']);
-            $table->unique(['day_name', 'gender']);
-            $table->timestamps();
+        Schema::table('attendances', function (Blueprint $table) {
+            $table->boolean('participation')->default(false);
         });
     }
 
@@ -25,6 +21,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('working_days');
+        Schema::table('attendances', function (Blueprint $table) {
+            //
+        });
     }
 };

@@ -35,4 +35,11 @@ class Student extends Model
 
     }
 
+    public function attendance()
+{
+    return $this->hasOne(Attendance::class)
+        ->where('date', request('date'))
+        ->where('subject_id', request('subject_id'));
+}
+
 }

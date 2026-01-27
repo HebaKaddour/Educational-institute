@@ -29,6 +29,7 @@ class StoreAttendanceRequest extends FormRequest
                 'students' => 'required|array',
                 'students.*.student_id' => 'required|exists:students,id',
                 'students.*.status' => 'required|in:حضور,غياب,بعذر',
+                 'students.*.participation' => 'nullable|boolean',
         ];
     }
 
@@ -40,6 +41,7 @@ class StoreAttendanceRequest extends FormRequest
             'week' => 'الأسبوع',
             'day' => 'اليوم',
             'status' => 'الحالة',
+            'participation' =>'المشاركة'
         ];
     }
 
