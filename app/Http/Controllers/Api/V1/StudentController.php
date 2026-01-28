@@ -6,6 +6,8 @@ use App\Models\Student;
 use App\Models\Subscription;
 use App\Services\V1\StudentService;
 use App\Http\Controllers\Controller;
+use App\Http\Resources\StudentResource;
+use App\Http\Resources\SubscriptionListResource;
 use App\Http\Requests\V1\Students\StoreStudentRequest;
 use App\Http\Requests\V1\Students\SearchStudentRequest;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -25,14 +27,43 @@ class StudentController extends Controller
      * @param  \App\Models\Student  $student
      *
       */
-    public function index()
-    {
-        return self::success($this->studentService->getAllStudents(),'قائمة الطلاب');
-    }
+public function index()
+{
+    $paginator = $this->studentService->getAllStudents();
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'قائمة الطلاب',
+        'data' => [
+            'total_students' => $paginator->total(),  // العدد الكلي
+            'students' => StudentResource::collection($paginator->items()), // الطلاب في الصفحة الحالية
+        ],
+        'pagination' => [
+            'count' => $paginator->count(),
+            'per_page' => $paginator->perPage(),
+            'current_page' => $paginator->currentPage(),
+            'total_pages' => $paginator->lastPage(),
+        ],
+    ]);
+}
 
     public function allSubscriptions(){
-        $subscription_deatils = $this->studentService->getAllStudentsWithDetails();
-        return self::success($subscription_deatils,'قائمة الاشتراكات',200);
+    $subscriptions = $this->studentService->getAllStudentsWithDetails();
+
+    return response()->json([
+        'status' => 'success',
+        'message' => 'قائمة الاشتراكات',
+        'data' => [
+            'total_subscriptions' => $subscriptions->total(), // العدد الكلي للنظام
+            'subscriptions' => SubscriptionListResource::collection($subscriptions->items()), // عناصر الصفحة الحالية
+        ],
+        'pagination' => [
+            'count' => $subscriptions->count(), // عدد العناصر في الصفحة الحالية
+            'per_page' => $subscriptions->perPage(),
+            'current_page' => $subscriptions->currentPage(),
+            'total_pages' => $subscriptions->lastPage(),
+        ],
+    ]);
 
     }
 

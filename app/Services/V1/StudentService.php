@@ -8,22 +8,18 @@ use App\Models\Subscription;
 use Illuminate\Support\Facades\DB;
 use App\Http\Resources\StudentResource;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Pagination\LengthAwarePaginator;
 use App\Http\Resources\SubscriptionListResource;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class StudentService {
-
+ protected int $perPage =15;
     //get all students
 public function getAllStudents()
 {
     // جلب جميع الطلاب مع الاشتراكات
 
-    $students = Student::with('subscriptions')->get();
-
-    return [
-        'count' => $students->count(),
-        'students' => StudentResource::collection($students),
-    ];
+    return Student::with('subscriptions')->paginate($this->perPage);
 }
 
     //get one student with his subscriptions and payments
@@ -40,7 +36,7 @@ public function getAllStudents()
 //get all student with subscriptions and payment details
 public function getAllStudentsWithDetails()
 {
-    $subscriptions = Subscription::query()
+    return Subscription::query()
         ->with([
             'student:id,full_name'
         ])
@@ -55,9 +51,9 @@ public function getAllStudentsWithDetails()
             'status'
         ])
         ->latest()
-        ->paginate(20);
+        ->paginate($this->perPage);
 
-    return SubscriptionListResource::collection($subscriptions);
+  //  return SubscriptionListResource::collection($subscriptions);
 }
 
 public function searchStudents(string $query)
