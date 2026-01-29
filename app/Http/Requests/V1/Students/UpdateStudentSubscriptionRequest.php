@@ -1,13 +1,11 @@
 <?php
-
 namespace App\Http\Requests\V1\Students;
-
 use Illuminate\Foundation\Http\FormRequest;
-
 class UpdateStudentSubscriptionRequest extends FormRequest
 {
     public function authorize(): bool
     {
+        //check
         return auth()->check() && auth()->user()->hasRole('admin');
     }
 
