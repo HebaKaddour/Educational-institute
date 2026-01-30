@@ -32,8 +32,8 @@ Route::prefix('V1')->group(function () {
        Route::delete('attendances/{attendance}',[AttendanceController::class, 'destroy']);
 
          // Settings Subject Evaluation
-        Route::post('subjects/{subject}/evaluation-settings', [SubjectEvaluationSettingController::class, 'store']);
         Route::get('subjects/{subject}/evaluation-settings', [SubjectEvaluationSettingController::class, 'index']);
+        Route::post('subjects/{subject}/evaluation-settings', [SubjectEvaluationSettingController::class, 'store']);
         Route::put('subject/evaluation-settings/{subjectEvaluationSetting}',[SubjectEvaluationSettingController::class, 'update']);
 
         Route::delete('subject/evaluation-settings/{subjectEvaluationSetting}',[SubjectEvaluationSettingController::class, 'destroy']);

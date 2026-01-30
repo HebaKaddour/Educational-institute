@@ -10,7 +10,7 @@ class SubjectEvaluationSetting extends Model
     use HasFactory;
     protected $fillable = [
         'subject_id',
-        'evaluation_type_id',
+        'evaluation_type',
         'max_score',
         'max_count',
     ];

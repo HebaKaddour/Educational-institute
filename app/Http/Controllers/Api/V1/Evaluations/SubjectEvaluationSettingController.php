@@ -17,27 +17,22 @@ class SubjectEvaluationSettingController extends Controller
 
     public function index(Subject $subject)
     {
-
-        return SubjectEvaluationSettingResource::collection(
-            $subject->evaluationSettings()->with('evaluationType')->get()
-        );
+       return self::success( $subject->evaluationSettings()->get(),'إعدادات التقييمات',200);
     }
 
+    // POST /subjects/{subject}/evaluation-settings
     public function store(StoreSubjectEvaluationSettingRequest $request, Subject $subject)
     {
         $setting = $this->subjectEvaluationSettingService->create($subject->id, $request->validated());
-        return self::success(
-            new SubjectEvaluationSettingResource($setting->load('evaluationType')),
-            'تم إنشاء إعداد التقييم بنجاح',
+        return self::success($setting,'تم إنشاء إعداد التقييم بنجاح',
             201
         );
     }
 
     public function update(UpdateSubjectEvaluationSettingRequest $request, SubjectEvaluationSetting $subjectEvaluationSetting)
     {
-        $this->subjectEvaluationSettingService->update($subjectEvaluationSetting, $request->validated());
-        return self::success(
-            new SubjectEvaluationSettingResource($subjectEvaluationSetting->load('evaluationType')),
+       $updated_settings =  $this->subjectEvaluationSettingService->update($subjectEvaluationSetting, $request->validated());
+        return self::success($updated_settings,
             'تم تحديث إعدادات التقييم للمادة المحددة بنجاح'
         );
     }

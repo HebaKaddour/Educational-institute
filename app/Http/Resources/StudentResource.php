@@ -28,16 +28,18 @@ class StudentResource extends JsonResource
             'grade' => $this->grade,
             'section' => $this->section,
             'status' => $this->status,
-            'subscriptions' => SubscriptionResource::collection($this->subscriptions),
+          //  'subscriptions' => SubscriptionResource::collection($this->subscriptions),
 
-            'financial_summary' => [
-                'total_paid' => $totalPaid,
-                'total_remaining' => max($totalNet - $totalPaid, 0),
-            ],
 
             'subscriptions' => SubscriptionResource::collection(
                 $this->whenLoaded('subscriptions')
             ),
+
+                'financial_summary' => [
+                'total_paid' => $totalPaid,
+                'total_remaining' => max($totalNet - $totalPaid, 0),
+            ],
+
         ];
     }
 }

@@ -3,7 +3,8 @@
 namespace App\Http\Requests\V1\Evaluations;
 
 use Mpdf\Tag\A;
-use App\Models\EvaluationType;
+use App\Enums\EvaluationType;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreSubjectEvaluationSettingRequest extends FormRequest
@@ -14,7 +15,8 @@ class StoreSubjectEvaluationSettingRequest extends FormRequest
     public function authorize(): bool
     {
        // return auth()->check() && (auth()->user()->hasRole('admin') || auth()->user()->hasRole('teacher'));
-       return true;
+       // return auth()->check() && auth()->user()->hasRole('admin');
+        return true;
     }
 
     /**
@@ -25,25 +27,22 @@ class StoreSubjectEvaluationSettingRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'evaluation_type' => 'required|exists:evaluation_types,label',
-            'evaluation_type_id' => 'required|integer|exists:evaluation_types,id',
-            'max_score' => 'required|numeric|min:0',
-            'max_count' => 'sometimes|integer|min:0',
+            'evaluation_type' => ['required','string', Rule::in(EvaluationType::arabicValues()),
+            ],
+            'max_count' => [
+                'nullable',
+                'integer',
+                'min:0',
+            ],
+
+            'max_score' => [
+                'nullable',
+                'integer',
+                'min:0',
+            ],
         ];
     }
 
-     protected function prepareForValidation(): void
-    {
-        if ($this->filled('evaluation_type')) {
-            $type = EvaluationType::where('label', $this->evaluation_type)->first();
-
-            if ($type) {
-                $this->merge([
-                    'evaluation_type_id' => $type->id,
-                ]);
-            }
-        }
-    }
 
     public function attributes(){
         return [

@@ -21,7 +21,6 @@ class Student extends Model
     public function subscriptions(){
     return $this->hasMany(Subscription::class);
    }
-
     public function attendances() {
         return $this->hasMany(Attendance::class);
     }

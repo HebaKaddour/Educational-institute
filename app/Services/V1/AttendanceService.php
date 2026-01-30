@@ -74,7 +74,6 @@ class AttendanceService
         }
     });
 
-    // إعادة Eloquent Collection مع العلاقات جاهزة
     return Attendance::with(['student', 'subject', 'evaluations.evaluationType'])
         ->whereIn('id', $attendanceIds)
 

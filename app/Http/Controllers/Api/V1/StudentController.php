@@ -29,14 +29,19 @@ class StudentController extends Controller
       */
 public function index()
 {
-    $paginator = $this->studentService->getAllStudents();
+  $paginator = $this->studentService->getAllStudents();
+
+    // 👇 مهم جدًا
+    $paginator->getCollection()->loadMissing('subscriptions.payments');
 
     return response()->json([
         'status' => 'success',
         'message' => 'قائمة الطلاب',
         'data' => [
-            'total_students' => $paginator->total(),  // العدد الكلي
-            'students' => StudentResource::collection($paginator->items()), // الطلاب في الصفحة الحالية
+            'total_students' => $paginator->total(),
+            'students' => StudentResource::collection(
+                $paginator->getCollection()
+            ),
         ],
         'pagination' => [
             'count' => $paginator->count(),

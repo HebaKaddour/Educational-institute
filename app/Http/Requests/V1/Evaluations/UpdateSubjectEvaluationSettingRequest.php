@@ -2,6 +2,8 @@
 
 namespace App\Http\Requests\V1\Evaluations;
 
+use App\Enums\EvaluationType;
+use Illuminate\Validation\Rule;
 use Illuminate\Foundation\Http\FormRequest;
 
 class UpdateSubjectEvaluationSettingRequest extends FormRequest
@@ -21,9 +23,21 @@ class UpdateSubjectEvaluationSettingRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'max_score' => 'sometimes|numeric|min:0',
-            'max_count' => 'sometimes|integer|min:0',
+         return [
+            'evaluation_type' => ['sometimes','string',Rule::in(EvaluationType::arabicValues()),
+            ],
+            'max_count' => [
+                'sometimes','nullable',
+                'integer',
+                'min:0',
+            ],
+
+            'max_score' => [
+                'sometimes',
+                'nullable',
+                'integer',
+                'min:0',
+            ],
         ];
     }
 }

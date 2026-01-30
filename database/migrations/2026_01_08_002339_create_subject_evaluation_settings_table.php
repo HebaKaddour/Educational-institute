@@ -12,16 +12,18 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('subject_evaluation_settings', function (Blueprint $table) {
-            $table->id();
-             $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
-    $table->foreignId('evaluation_type_id')->constrained()->cascadeOnDelete();
-
-    $table->unsignedSmallInteger('max_score');
+    $table->id();
+    $table->foreignId('subject_id')->constrained()->cascadeOnDelete();
+    // نوع التقييم مباشرة كـ Enum value
+    $table->string('evaluation_type');
+    // عدد الواجبات (للتقييمات التي تعتمد على عدد مرات الإنجاز)
     $table->unsignedSmallInteger('max_count')->nullable();
+    // الدرجة القصوى للاختبارات
+    $table->unsignedSmallInteger('max_score')->nullable();
 
     $table->timestamps();
 
-    $table->unique(['subject_id', 'evaluation_type_id']);
+    $table->unique(['subject_id', 'evaluation_type'], 'unique_subject_eval_type');
         });
     }
 

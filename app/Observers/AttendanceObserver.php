@@ -6,7 +6,8 @@ use DB;
 use App\Models\Subject;
 use App\Models\Attendance;
 use App\Models\Evaluation;
-use App\Models\EvaluationType;
+use App\Enums\EvaluationType;
+use App\Models\SubjectEvaluationSetting;
 
 class AttendanceObserver
 {
@@ -22,84 +23,86 @@ class AttendanceObserver
 
     protected function handleAttendance(Attendance $attendance, bool $isUpdate = false): void
     {
-        if (!$attendance->subject_id) {
-            return;
-        }
+        if (!$attendance->subject_id) return;
 
         $teacherId = Subject::where('id', $attendance->subject_id)->value('teacher_id');
         if (!$teacherId) return;
 
-        $attendanceType    = EvaluationType::where('label', 'الحضور')->first();
-        $participationType = EvaluationType::where('label', 'المشاركة')->first();
-
-        // ----------------------
-        // معالجة حالة الحضور
-        // ----------------------
-        if ($attendanceType) {
-            if (in_array($attendance->status, ['حضور', 'بعذر'])) {
-                // إنشاء أو تحديث تقييم الحضور
-                $this->createEvaluationOnce($attendance, $attendanceType, $teacherId);
-            } elseif ($attendance->status === 'غياب') {
-                // حذف تقييم الحضور
-                Evaluation::where([
-                    'student_id' => $attendance->student_id,
-                    'subject_id' => $attendance->subject_id,
-                    'evaluation_type_id' => $attendanceType->id,
-                    'evaluation_date' => $attendance->date,
-                ])->delete();
-
-                // حذف تقييم المشاركة
-                if ($participationType) {
-                    Evaluation::where([
-                        'student_id' => $attendance->student_id,
-                        'subject_id' => $attendance->subject_id,
-                        'evaluation_type_id' => $participationType->id,
-                        'evaluation_date' => $attendance->date,
-                    ])->delete();
-                }
-
-                // تحديث عمود المشاركة في الحضور إلى false
-                if ($attendance->participation) {
-                    $attendance->participation = false;
-                    $attendance->saveQuietly();
-                }
-            }
+        // ======================
+        // 1️⃣ الحضور
+        // ======================
+        if (in_array($attendance->status, ['حضور', 'بعذر'])) {
+            $this->syncEvaluation($attendance, EvaluationType::ATTENDANCE, $teacherId);
         }
 
-        // ----------------------
-        // معالجة المشاركة
-        // ----------------------
-        if ($participationType) {
-            // إذا أصبحت المشاركة true (جديدة أو تعديل)
-            if ($attendance->participation && (!$isUpdate || $attendance->wasChanged('participation'))) {
-                $this->createEvaluationOnce($attendance, $participationType, $teacherId);
-            }
+        if ($attendance->status === 'غياب') {
+            $this->deleteEvaluation($attendance, EvaluationType::ATTENDANCE);
+            $this->deleteEvaluation($attendance, EvaluationType::PARTICIPATION);
 
-            // إذا تم تعديل المشاركة إلى false
-            if ($isUpdate && $attendance->wasChanged('participation') && !$attendance->participation) {
-                Evaluation::where([
-                    'student_id' => $attendance->student_id,
-                    'subject_id' => $attendance->subject_id,
-                    'evaluation_type_id' => $participationType->id,
-                    'evaluation_date' => $attendance->date,
-                ])->delete();
+            if ($attendance->participation) {
+                $attendance->updateQuietly(['participation' => false]);
             }
+            return;
+        }
+
+        // ======================
+        // 2️⃣ المشاركة
+        // ======================
+        if ($attendance->participation) {
+            $this->syncEvaluation($attendance, EvaluationType::PARTICIPATION, $teacherId);
+        }
+
+        if ($isUpdate && $attendance->wasChanged('participation') && !$attendance->participation) {
+            $this->deleteEvaluation($attendance, EvaluationType::PARTICIPATION);
         }
     }
 
-    protected function createEvaluationOnce(Attendance $attendance, EvaluationType $type, int $teacherId): void
-    {
-        Evaluation::firstOrCreate(
+    // ======================
+    // Helpers
+    // ======================
+
+    protected function syncEvaluation(
+        Attendance $attendance,
+        EvaluationType $type,
+        int $teacherId
+    ): void {
+        $score = $this->getScoreFromSettings($attendance->subject_id, $type);
+
+        if ($score === null) return;
+
+        Evaluation::updateOrCreate(
             [
-                'student_id'         => $attendance->student_id,
-                'subject_id'         => $attendance->subject_id,
-                'evaluation_type_id' => $type->id,
-                'evaluation_date'    => $attendance->date,
+                'student_id'      => $attendance->student_id,
+                'subject_id'      => $attendance->subject_id,
+                'evaluation_type' => $type->value,
+                'evaluation_date' => $attendance->date,
             ],
             [
                 'teacher_id' => $teacherId,
-                'score'      => 5, // إضافة 5 درجات مرة واحدة
+                'score'      => $score,
             ]
         );
+    }
+
+    protected function deleteEvaluation(
+        Attendance $attendance,
+        EvaluationType $type
+    ): void {
+        Evaluation::where([
+            'student_id'      => $attendance->student_id,
+            'subject_id'      => $attendance->subject_id,
+            'evaluation_type' => $type->value,
+            'evaluation_date' => $attendance->date,
+        ])->delete();
+    }
+
+    protected function getScoreFromSettings(
+        int $subjectId,
+        EvaluationType $type
+    ): ?int {
+        return SubjectEvaluationSetting::where([
+            'subject_id'      => $subjectId,
+            'evaluation_type' => $type->value,
+        ])->value('score');
     }
 }

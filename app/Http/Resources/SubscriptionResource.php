@@ -16,6 +16,7 @@ class SubscriptionResource extends JsonResource
  public function toArray($request)
     {
         return [
+            'id' => $this->id,
             'month_number' => $this->month_number,
             'start_date' => Carbon::parse($this->start_date)->format('Y-m-d'),
             'end_date' => Carbon::parse($this->end_date)->format('Y-m-d'),
@@ -24,6 +25,7 @@ class SubscriptionResource extends JsonResource
             'discount_percentage' => $this->discount_percentage,
             'net_fee' => $this->net_fee,
             'status' => $this->status,
+            'payments' => PaymentResource::collection($this->payments),
         ];
     }
 }

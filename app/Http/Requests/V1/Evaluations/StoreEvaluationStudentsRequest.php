@@ -23,32 +23,17 @@ class StoreEvaluationStudentsRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
-            'subject_id' => 'required|exists:subjects,id',
+         return [
+            'subject_id' => ['required', 'exists:subjects,id'],
 
-            'grades' => 'required|array|min:1',
-           'grades.*.student_id' => [
-                'required',
-                'integer',
-                function ($attribute, $value, $fail) {
-                    if (!Student::where('id', $value)->exists()) {
-                        $index = explode('.', $attribute)[1];
-                        $fail("الطالب في الصف رقم {$index} غير موجود في النظام");
-                    }
-                }
-            ],
+            'grades' => ['required', 'array'],
+            'grades.*.student_id' => ['required', 'exists:students,id'],
 
-            'grades.*.evaluations' => 'required|array|min:1',
-
-            'grades.*.evaluations.*.evaluation_type_id'
-                => 'required|exists:evaluation_types,id',
-
-            'grades.*.evaluations.*.evaluation_number'
-                => 'nullable|integer|min:1',
-
-            'grades.*.evaluations.*.score'
-                => 'required|integer|min:0',
-
+            'grades.*.evaluations' => ['required', 'array'],
+            'grades.*.evaluations.*.evaluation_type' => ['required', 'string'],
+            'grades.*.evaluations.*.score' => ['required', 'numeric', 'min:0'],
+            'grades.*.evaluations.*.evaluation_number' => ['nullable', 'integer', 'min:1'],
+            'grades.*.evaluations.*.evaluation_date' => ['nullable', 'date'],
         ];
     }
 
@@ -74,12 +59,12 @@ class StoreEvaluationStudentsRequest extends FormRequest
     public function messages()
     {
         return [
-            'required' => 'حقل :attribute مطلوب.',
-            'exists' => 'القيمة المحددة في حقل :attribute غير صالحة.',
-            'array' => 'حقل :attribute يجب أن يكون مصفوفة.',
-            'min' => 'قيمة حقل :attribute يجب أن تكون على الأقل :min.',
-            'integer' => 'حقل :attribute يجب أن يكون عدداً صحيحاً.',
-            'nullable' => 'حقل :attribute يمكن أن يكون فارغاً.',
+            'subject_id.required' => 'المادة مطلوبة',
+            'grades.required' => 'بيانات الطلاب مطلوبة',
+            'grades.*.student_id.required' => 'الطالب مطلوب',
+            'grades.*.evaluations.required' => 'التقييمات مطلوبة',
+            'grades.*.evaluations.*.evaluation_type.required' => 'نوع التقييم مطلوب',
+            'grades.*.evaluations.*.score.required' => 'الدرجة مطلوبة',
 
         ];
     }

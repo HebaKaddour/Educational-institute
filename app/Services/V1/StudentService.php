@@ -19,7 +19,7 @@ public function getAllStudents()
 {
     // جلب جميع الطلاب مع الاشتراكات
 
-    return Student::with('subscriptions')->paginate($this->perPage);
+    return Student::with('subscriptions.payments')->paginate($this->perPage);
 }
 
     //get one student with his subscriptions and payments

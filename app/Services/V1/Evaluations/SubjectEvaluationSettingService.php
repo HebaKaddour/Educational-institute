@@ -1,8 +1,9 @@
 <?php
 namespace App\Services\V1\Evaluations;
 use App\Models\Subject;
-use App\Models\EvaluationType;
+use App\Enums\EvaluationType;
 use App\Models\SubjectEvaluationSetting;
+use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 
 class SubjectEvaluationSettingService
@@ -32,11 +33,15 @@ public function create(int $subjectId, array $data): SubjectEvaluationSetting
         $subject = Subject::findOrFail($subjectId);
 
         $this->authorize($user, $subject);
+        $type = EvaluationType::fromArabic($data['evaluation_type']);
+
+        $this->validateByType($type, $data);
+
 
         return SubjectEvaluationSetting::create([
             'subject_id'         => $subject->id,
-            'evaluation_type_id' => $data['evaluation_type_id'],
-            'max_score'          => $data['max_score'],
+            'evaluation_type' => $data['evaluation_type'],
+            'max_score'          => $data['max_score'] ?? null,
             'max_count'          => $data['max_count'] ?? null,
         ]);
     }
@@ -44,7 +49,20 @@ public function create(int $subjectId, array $data): SubjectEvaluationSetting
     {
         $user = auth('sanctum')->user();
         $this->authorize($user, $subjectevaluationsetting->subject);
-        $subjectevaluationsetting->update($data);
+
+        if (isset($data['evaluation_type'])) {
+            $type = EvaluationType::from($data['evaluation_type']);
+        } else {
+            $type = EvaluationType::from($subjectevaluationsetting->evaluation_type);
+        }
+
+        $this->validateByType($type, $data, true);
+
+        $subjectevaluationsetting->update([
+            'max_count' => $data['max_count'] ?? $subjectevaluationsetting->max_count,
+            'max_score' => $data['max_score'] ?? $subjectevaluationsetting->max_score,
+        ]);
+
         return $subjectevaluationsetting;
     }
 
@@ -55,5 +73,69 @@ public function create(int $subjectId, array $data): SubjectEvaluationSetting
         $this->authorize($user, $subjectevaluationsetting->subject);
 
         $subjectevaluationsetting->delete();
+    }
+
+    private function validateByType(EvaluationType $type,array $data,bool $isUpdate = false): void {
+        match ($type) {
+
+            // -------------------------
+            // الحضور والمشاركة
+            // -------------------------
+            EvaluationType::ATTENDANCE,
+            EvaluationType::PARTICIPATION
+                => $this->validateNoExtraFields($data),
+
+            // -------------------------
+            // الواجبات
+            // -------------------------
+            EvaluationType::HOMEWORK
+                => $this->validateHomework($data, $isUpdate),
+
+            // -------------------------
+            // الاختبارات
+            // -------------------------
+            EvaluationType::EXAM
+                => $this->validateExam($data, $isUpdate),
+        };
+    }
+
+    private function validateNoExtraFields(array $data): void
+    {
+        if (!empty($data['max_count'])) {
+            throw ValidationException::withMessages([
+                'evaluation_type' =>
+                    'هذا النوع لا يقبل إعدادات إضافية'
+            ]);
+        }
+    }
+
+    private function validateHomework(array $data, bool $isUpdate): void
+    {
+        if (!$isUpdate && empty($data['max_count'])) {
+            throw ValidationException::withMessages([
+                'max_count' => 'عدد الواجبات مطلوب'
+            ]);
+        }
+
+        if (isset($data['max_score'])) {
+            throw ValidationException::withMessages([
+                'max_score' => 'الواجبات لا تستخدم max_score'
+            ]);
+        }
+    }
+
+    private function validateExam(array $data, bool $isUpdate): void
+    {
+        if (!$isUpdate && empty($data['max_score'])) {
+            throw ValidationException::withMessages([
+                'max_score' => 'الدرجة القصوى للاختبار مطلوبة'
+            ]);
+        }
+
+        if (!isset($data['max_count'])) {
+            throw ValidationException::withMessages([
+                'max_count' => 'الاختبارات تحتاج لتحديد قيمة max_count'
+            ]);
+        }
     }
 }
