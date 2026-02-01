@@ -29,8 +29,7 @@ class Attendance extends Model
         return $this->belongsTo(Subject::class);
     }
  public function evaluations() {
-        return $this->hasMany(Evaluation::class, 'student_id', 'student_id')
-            ->with('evaluationType'); // Eager load نوع التقييم
+        return $this->hasMany(Evaluation::class, 'student_id', 'student_id');
     }
 
     //scope for filtering

@@ -11,17 +11,17 @@ use App\Models\SubjectEvaluationSetting;
 
 class AttendanceObserver
 {
-    public function created(Attendance $attendance): void
+    public function created(Attendance $attendance)
     {
         $this->handleAttendance($attendance);
     }
 
-    public function updated(Attendance $attendance): void
+    public function updated(Attendance $attendance)
     {
         $this->handleAttendance($attendance, true);
     }
 
-    protected function handleAttendance(Attendance $attendance, bool $isUpdate = false): void
+    protected function handleAttendance(Attendance $attendance, bool $isUpdate = false)
     {
         if (!$attendance->subject_id) return;
 
@@ -66,10 +66,13 @@ class AttendanceObserver
         EvaluationType $type,
         int $teacherId
     ): void {
-        $score = $this->getScoreFromSettings($attendance->subject_id, $type);
+        $max_score = $this->getScoreFromSettings($attendance->subject_id, $type);
 
-        if ($score === null) return;
+    if ($max_score === null && in_array($type, [EvaluationType::ATTENDANCE, EvaluationType::PARTICIPATION])) {
+        $max_score = 5;
+    }
 
+    if ($max_score === null) return;
         Evaluation::updateOrCreate(
             [
                 'student_id'      => $attendance->student_id,
@@ -79,7 +82,7 @@ class AttendanceObserver
             ],
             [
                 'teacher_id' => $teacherId,
-                'score'      => $score,
+                'score'      => $max_score,
             ]
         );
     }
@@ -103,6 +106,6 @@ class AttendanceObserver
         return SubjectEvaluationSetting::where([
             'subject_id'      => $subjectId,
             'evaluation_type' => $type->value,
-        ])->value('score');
+        ])->value('max_score');
     }
 }

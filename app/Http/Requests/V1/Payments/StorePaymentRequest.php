@@ -24,7 +24,7 @@ class StorePaymentRequest extends FormRequest
         return [
             'amount'  => 'required|numeric|min:1',
             'method'  => 'required|string|max:100',
-            'paid_at' => 'required|date',
+            'paid_at' => 'sometimes|date',
             'note'    => 'nullable|string|max:500',
         ];
 

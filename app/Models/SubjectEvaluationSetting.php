@@ -19,8 +19,4 @@ class SubjectEvaluationSetting extends Model
     {
         return $this->belongsTo(Subject::class);
     }
-    public function evaluationType()
-    {
-        return $this->belongsTo(EvaluationType::class);
-    }
 }

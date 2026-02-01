@@ -2,10 +2,22 @@
 namespace App\Services\V1\Reports;
 
 use App\Models\Student;
+use App\Models\Evaluation;
 use Illuminate\Support\Collection;
 
 class StudentReportService
 {
+    public function getGradesForPrint(array $filters = [], $user = null): \Illuminate\Support\Collection
+{
+    return Evaluation::with([
+            'student:id,full_name,gender,grade',
+            'subject:id,name'
+        ])
+        ->filter($filters, $user)
+        ->orderBy('student_id')
+        ->orderBy('subject_id')
+        ->get();
+}
     public function getGroupedStudents(array $filters)
     {
     $query = Student::query()

@@ -3,7 +3,6 @@
 namespace App\Http\Requests\V1\Evaluations;
 
 use App\Models\Student;
-use App\Models\EvaluationType;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreEvaluationStudentsRequest extends FormRequest
@@ -31,9 +30,10 @@ class StoreEvaluationStudentsRequest extends FormRequest
 
             'grades.*.evaluations' => ['required', 'array'],
             'grades.*.evaluations.*.evaluation_type' => ['required', 'string'],
-            'grades.*.evaluations.*.score' => ['required', 'numeric', 'min:0'],
+            'grades.*.evaluations.*.score' => ['nullable', 'numeric', 'min:0'],
             'grades.*.evaluations.*.evaluation_number' => ['nullable', 'integer', 'min:1'],
             'grades.*.evaluations.*.evaluation_date' => ['nullable', 'date'],
+            'grades.*.evaluations.*.is_completed' => ['nullable', 'boolean'],
         ];
     }
 

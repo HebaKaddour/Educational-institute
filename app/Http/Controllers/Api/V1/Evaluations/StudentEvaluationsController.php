@@ -24,33 +24,17 @@ class StudentEvaluationsController extends Controller
     }
 
      public function update(UpdateEvaluationRequest $request,Evaluation $evaluation) {
-        return self::success($this->studentsEvaluationService->updateEvaluationForStudent($evaluation,$request->validated()), 'تم تعديل الدرجة بنجاح');
+        return self::success($this->studentsEvaluationService->updateEvaluationForStudent($evaluation,$request->validated()), 'تم تعديل تقييم الطالب بنجاح');
     }
 
-public function allGrades(Request $request)
+public function index(Request $request)
 {
-    $evaluations = $this->studentsEvaluationService->getGrades(
-        filters: $request->only([
-            'student_id',
-            'subject_id',
-            'grade',
-            'gender',
-        ])
-    );
+    $filters = $request->only(['student_id', 'subject_id', 'grade', 'gender', 'per_page']);
+    $user = auth('sanctum')->user();
 
-    // طالب واحد
-    if ($request->filled('student_id')) {
-        return self::success(
-            StudentGradesResource::make($evaluations),
-            'درجات الطالب'
-        );
-    }
+    $grades = $this->studentsEvaluationService->getGrades($filters, $user);
 
-    // عدة طلاب
-    return self::success(
-        StudentsGradesCollection::make($evaluations),
-        'درجات الطلاب'
-    );
+    return new StudentsGradesCollection($grades);
 }
 
     public function deleteGrades(Evaluation $evaluation)

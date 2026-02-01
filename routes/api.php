@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\V1\StudentController;
 use App\Http\Controllers\Api\V1\SubjectController;
 use App\Http\Controllers\Api\V1\TeacherController;
 use App\Http\Controllers\Api\V1\AttendanceController;
+use App\Http\Controllers\Api\AttendanceReportController;
 use App\Http\Controllers\Api\V1\SettingsSchedulerController;
 use App\Http\Controllers\Api\V1\Reports\StudentReportController;
 use App\Http\Controllers\Api\V1\Evaluations\EvaluationTypeController;
@@ -41,7 +42,7 @@ Route::prefix('V1')->group(function () {
 
         // Student Evaluations
        Route::post('students/evaluations', [StudentEvaluationsController::class, 'store']);
-       Route::get('grades', [StudentEvaluationsController::class, 'allGrades']);
+       Route::get('grades', [StudentEvaluationsController::class, 'index']);
        Route::put('evaluations/{evaluation}', [StudentEvaluationsController::class, 'update']);
        Route::delete('evaluations/{evaluation}', [StudentEvaluationsController::class, 'deleteGrades']);
     });
@@ -61,14 +62,12 @@ Route::prefix('V1')->group(function () {
         );
             Route::patch('students/{student}/change-status', [StudentController::class, 'changeStatus']);
             Route::post('students/{student}/subscriptions',[StudentController::class, 'addSubscription']);
-
-            Route::post(
-    '/subscriptions/{subscription}/payments',
-    [paymentController::class, 'store']
-);
-
+    // PAYMENT
+     Route::post('/subscriptions/{subscription}/payments',[paymentController::class, 'store']);
+     Route::put('/payments/{payment}', [PaymentController::class, 'update']);
+    Route::delete('/payments/{payment}', [PaymentController::class, 'destroy']);
      Route::get(
-    '/subscriptions/{subscription}/monthly-payments',
+'/subscriptions/{subscription}/monthly-payments',
     [paymentController::class, 'monthlyPayments']
 );
 
@@ -96,7 +95,17 @@ Route::prefix('V1')->group(function () {
 
     // Reports
       Route::get('reports/students', [StudentReportController::class, 'index']);
-      Route::get('reports/student/pdf', [StudentReportController::class, 'exportPdf']);
-        });
+      Route::get('grades/print/pdf', [StudentReportController::class, 'print']);
+
+
+    Route::get('attendance/daily', [AttendanceReportController::class,'daily']);
+    Route::get('attendance/daily/print', [AttendanceReportController::class,'dailyPrint']);
+
+    Route::get('attendance/student', [AttendanceReportController::class,'byStudent']);
+    Route::get('attendance/student/print', [AttendanceReportController::class,'byStudentPrint']);
+
+    Route::get('attendance/grade', [AttendanceReportController::class,'byGrade']);
+    Route::get('attendance/grade/print', [AttendanceReportController::class,'byGradePrint']);
+      });
     });
     });

@@ -23,7 +23,7 @@ class AttendanceController extends Controller
     public function store(StoreAttendanceRequest $request)
     {
         $attendances = $this->attendanceService->storeDailyAttendance($request->validated());
-           $attendances->load(['student', 'subject', 'evaluations.evaluationType']);
+           $attendances->load(['student', 'subject', 'evaluations']);
         return self::success(AttendanceResource::collection($attendances), 'تم تسجيل الحضور بنجاح', 201);
 
     }

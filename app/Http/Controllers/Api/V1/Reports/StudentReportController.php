@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Http\Controllers\Controller;
 use App\Services\V1\Reports\StudentReportService;
+use App\Http\Resources\StudentGradesPrintResource;
 use App\Http\Requests\V1\Reports\StudentReportRequest;
 
 class StudentReportController extends Controller
@@ -15,46 +16,66 @@ class StudentReportController extends Controller
     {
     }
 
-public function index(StudentReportRequest $request)
+
+public function print(Request $request)
 {
-    $groups = $this->studentReportService
-        ->getGroupedStudents($request->validated());
+    $filters = $request->only(['student_id', 'subject_id', 'grade', 'gender']);
+        $user = auth('sanctum')->user();
 
-    return response()->json([
-        'status' => 'success',
-        'data' => $this->studentReportService->formatGrouped($groups)
-    ]);
-}
+        // 1️⃣ جلب التقييمات من السيرفس
+        $evaluations = $this->studentReportService
+            ->getGradesForPrint($filters, $user);
 
-public function exportPdf(StudentReportRequest $request)
-{
-    $groups = $this->studentReportService
-        ->getGroupedStudents($request->validated());
+        // 2️⃣ تحويل التقييمات إلى بيانات جاهزة
+        $students = StudentGradesPrintResource::collection(
+            $evaluations->groupBy('student_id')
+        )->resolve();
 
-    $data = $this->studentReportService->formatGrouped($groups);
+        // 3️⃣ إذا حددنا ?format=pdf في الرابط
+        if ($request->query('format') === 'pdf') {
+            $html = $this->generateHtml($students);
+            $pdf  = Pdf::loadHTML($html);
+            return $pdf->download('students-grades.pdf');
+        }
 
-    $html = view('reports.students', [
-        'groups' => $data,
-        'total'  => collect($data)->sum('total'),
-    ])->render();
+        // 4️⃣ خلاف ذلك نرجع JSON
+        return response()->json([
+            'status' => 'success',
+            'message' => 'تقييمات الطلاب جاهزة',
+            'data' => $students,
+        ]);
+    }
 
-    $mpdf = new Mpdf([
-        'mode' => 'utf-8',
-        'format' => 'A4-L',
-        'default_font' => 'cairo',
-        'direction' => 'rtl',
-    ]);
+    /**
+     * توليد HTML سريع من البيانات لإنشاء PDF
+     */
+    private function generateHtml(array $students): string
+    {
+        $html = '<h1 style="text-align:center;">تقرير درجات الطلاب</h1>';
+        foreach ($students as $student) {
+            $html .= "<h2>{$student['student_name']} - {$student['student_class']}</h2>";
+            $html .= '<table border="1" cellspacing="0" cellpadding="5" width="100%">';
+            $html .= '<tr style="background:#eee;"><th>المادة</th><th>الحضور</th><th>المشاركة</th><th>الواجبات</th><th>الاختبارات</th><th>المجموع</th><th>الدرجة</th></tr>';
 
-    $mpdf->WriteHTML($html);
+            foreach ($student['subjects'] as $subject) {
+                $scores = $subject['scores'];
+                $exams  = is_array($scores['الاختبار']) ? implode(', ', $scores['الاختبار']) : $scores['الاختبار'];
 
-    return response(
-        $mpdf->Output('student_report.pdf', 'S'),
-        200,
-        [
-            'Content-Type' => 'application/pdf',
-            'Content-Disposition' => 'attachment; filename="student_report.pdf"',
-        ]
-    );
-}
+                $html .= "<tr>
+                    <td>{$subject['subject']}</td>
+                    <td>{$scores['الحضور']}</td>
+                    <td>{$scores['المشاركة']}</td>
+                    <td>{$scores['الواجبات']}</td>
+                    <td>{$exams}</td>
+                    <td>{$subject['total']}</td>
+                    <td>{$subject['grade']}</td>
+                </tr>";
+            }
+
+            $html .= '</table><br><br>';
+        }
+
+        return $html;
+    }
 
 }

@@ -3,8 +3,9 @@
 namespace App\Http\Resources;
 
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use App\Enums\EvaluationType;
 use Illuminate\Support\Collection;
+use Illuminate\Http\Resources\Json\JsonResource;
 
 class StudentGradesResource extends JsonResource
 {
@@ -13,51 +14,48 @@ class StudentGradesResource extends JsonResource
      *
      * @return array<string, mixed>
      */
-
-        public function toArray($request): array
+public function toArray($request): array
     {
- $student = $this->pluck('student')->unique('id')->first();
+        // الحصول على الطالب من أول تقييم
+        $student = $this->first()->student;
 
         if (!$student) {
             return [];
         }
 
-        $subjects = $this
-            ->where('student_id', $student->id)
-            ->groupBy('subject_id')
-            ->map(function ($evaluations) {
+        // نجمع التقييمات لكل مادة
+        $subjects = $this->groupBy('subject_id')->map(function ($evaluations) {
 
-                $byType = $evaluations->groupBy(
-                    fn ($evaluation) => $evaluation->evaluationType->label
-                );
+            $subjectTotals = [];
+            $totalScore = 0;
 
-                $attendance    = $byType->get('الحضور')?->sum('score') ?? 0;
-                $participation = $byType->get('المشاركة')?->sum('score') ?? 0;
-                $homework      = $byType->get('الواجبات')?->sum('score') ?? 0;
-                $exams         = $byType->get('الاختبارات')?->pluck('score') ?? collect();
+            foreach (EvaluationType::cases() as $type) {
+                $label = $type->label();
 
-                $total = $attendance + $participation + $homework + $exams->sum();
+                // احصل على جميع التقييمات من نفس النوع
+                $scores = $evaluations->filter(fn($e) => $e->evaluation_type === $type->value)->pluck('score');
 
-                return [
-                    'subject_name' => $evaluations->first()->subject->name,
-                    'attendance'   => $attendance,
-                    'participation'=> $participation,
-                    'homework'     => $homework,
-                    'exams'        => $exams->values(),
-                    'total'        => $total,
-                    'grade'        => $this->grade($total),
-                ];
-            })->values();
+                // إذا كان هناك تقييم واحد نرجع القيمة مباشرة، إذا أكثر نرجع Collection
+                $subjectTotals[$label] = $scores->count() > 1 ? $scores->values() : ($scores->first() ?? 0);
+
+                $totalScore += $scores->sum();
+            }
+
+            return [
+                'subject_name' => $evaluations->first()->subject->name,
+                'scores'       => $subjectTotals,
+                'total'        => $totalScore,
+                'grade'        => $this->grade($totalScore),
+            ];
+        })->values();
 
         return [
-            'student_id'   => $student->id,
+            'student_id'    => $student->id,
             'student_class' => $student->grade,
-            'student_name' => $student->full_name,
-            'subjects'     => $subjects,
+            'student_name'  => $student->full_name,
+            'subjects'      => $subjects,
         ];
     }
-
-
 
     private function grade(int $total): string
     {

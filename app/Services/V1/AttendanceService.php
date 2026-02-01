@@ -5,7 +5,7 @@ use App\Models\Student;
 use App\Models\Subject;
 use App\Models\Attendance;
 use App\Models\Evaluation;
-use App\Models\EvaluationType;
+use App\Enums\EvaluationType;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -14,7 +14,7 @@ use Illuminate\Auth\Access\AuthorizationException;
 
 class AttendanceService
 {
-  public function storeDailyAttendance(array $data)
+ public function storeDailyAttendance(array $data)
 {
     $user = auth()->user();
     if (!$user) {
@@ -24,6 +24,7 @@ class AttendanceService
     $subject = null;
     if (!empty($data['subject_id'])) {
         $subject = Subject::select('id', 'teacher_id')->findOrFail($data['subject_id']);
+
         if ($user->hasRole('teacher') && $subject->teacher_id !== $user->id) {
             throw new AuthorizationException('غير مصرح لك بإدارة حضور هذه المادة');
         }
@@ -38,8 +39,8 @@ class AttendanceService
 
     DB::transaction(function () use ($data, $students, $subject, &$attendanceIds) {
         foreach ($data['students'] as $index => $item) {
-            $student = $students[$item['student_id']] ?? null;
 
+            $student = $students[$item['student_id']] ?? null;
             if (!$student) {
                 throw ValidationException::withMessages([
                     "students.$index.student_id" => 'الطالب غير موجود'
@@ -52,7 +53,8 @@ class AttendanceService
 
             if (!$workingDay) {
                 throw ValidationException::withMessages([
-                    "students.$index.student_id" => "لا يمكن تسجيل حضور {$student->full_name} في يوم {$data['day']} للجنس {$student->gender}"
+                    "students.$index.student_id" =>
+                        "لا يمكن تسجيل حضور {$student->full_name} في يوم {$data['day']} للجنس {$student->gender}"
                 ]);
             }
 
@@ -74,47 +76,43 @@ class AttendanceService
         }
     });
 
-    return Attendance::with(['student', 'subject', 'evaluations.evaluationType'])
-        ->whereIn('id', $attendanceIds)
-
-        ->get();
+    // ⬅️ هنا السر: evaluations فقط (الـ type سيظهر تلقائيًا)
+    return Attendance::with([
+        'student',
+        'subject',
+        'evaluations'
+    ])->whereIn('id', $attendanceIds)->get();
 }
+
 
    /**
  * تعديل الحضور والمشاركة
  */
 public function updateAttendance(array $data, Attendance $attendance): Attendance
 {
-$user = auth()->user();
+    $user = auth()->user();
     if (!$user) {
         throw new AuthorizationException('User not authenticated.');
     }
 
     DB::transaction(function () use ($data, $attendance) {
 
-        // أولاً تحديث حالة الحضور إذا موجودة
         if (array_key_exists('status', $data)) {
-            $attendance->update([
-                'status' => $data['status']
-            ]);
+            $attendance->update(['status' => $data['status']]);
         }
 
-        // ثم تحديث المشاركة إذا موجودة
         if (array_key_exists('participation', $data)) {
-            $attendance->update([
-                'participation' => (bool) $data['participation']
-            ]);
+            $attendance->update(['participation' => (bool) $data['participation']]);
         }
-
     });
 
-    // إعادة تحميل الحضور مع العلاقات بعد التحديث
     return $attendance->refresh()->load([
         'student',
         'subject:id,name',
-        'evaluations.evaluationType'
+        'evaluations'
     ]);
 }
+
     public function daily(array $filters): LengthAwarePaginator
     {
         $perPage = $filters['per_page'] ?? 15;
@@ -186,42 +184,31 @@ $user = auth()->user();
     /**
      * حذف الحضور والمشاركة
      */
-  public function deleteAttendance(Attendance $attendance): void
-    {
-        $user = auth()->user();
-        if (!$user) {
-            throw new AuthorizationException('User not authenticated.');
-        }
-
-        DB::transaction(function () use ($attendance) {
-
-            // احصل على نوعي التقييم: حضور ومشاركة
-            $attendanceType    = EvaluationType::where('label', 'الحضور')->first();
-            $participationType = EvaluationType::where('label', 'المشاركة')->first();
-
-            // حذف تقييم الحضور
-            if ($attendanceType) {
-                Evaluation::where([
-                    'student_id'         => $attendance->student_id,
-                    'subject_id'         => $attendance->subject_id,
-                    'evaluation_type_id' => $attendanceType->id,
-                    'evaluation_date'    => $attendance->date,
-                ])->delete();
-            }
-
-            // حذف تقييم المشاركة
-            if ($participationType) {
-                Evaluation::where([
-                    'student_id'         => $attendance->student_id,
-                    'subject_id'         => $attendance->subject_id,
-                    'evaluation_type_id' => $participationType->id,
-                    'evaluation_date'    => $attendance->date,
-                ])->delete();
-            }
-
-            // حذف سجل الحضور نفسه
-            $attendance->delete();
-        });
+public function deleteAttendance(Attendance $attendance): void
+{
+    $user = auth()->user();
+    if (!$user) {
+        throw new AuthorizationException('User not authenticated.');
     }
+
+    DB::transaction(function () use ($attendance) {
+
+        Evaluation::where([
+            'student_id'      => $attendance->student_id,
+            'subject_id'      => $attendance->subject_id,
+            'evaluation_type' => EvaluationType::ATTENDANCE->value,
+            'evaluation_date' => $attendance->date,
+        ])->delete();
+
+        Evaluation::where([
+            'student_id'      => $attendance->student_id,
+            'subject_id'      => $attendance->subject_id,
+            'evaluation_type' => EvaluationType::PARTICIPATION->value,
+            'evaluation_date' => $attendance->date,
+        ])->delete();
+
+        $attendance->delete();
+    });
+}
 
 }

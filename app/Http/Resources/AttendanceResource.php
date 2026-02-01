@@ -41,7 +41,7 @@ class AttendanceResource extends JsonResource
                     )
                     ->map(fn($eval) => [
                         'id' => $eval->id,
-                        'type' => $eval->evaluationType->label ?? null,
+                        'type' => $eval->type,
                         'score' => $eval->score,
                         'date' => $eval->evaluation_date,
                     ])

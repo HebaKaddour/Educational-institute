@@ -20,7 +20,7 @@ class PaymentService
                 'subscription_id' => $subscription->id,
                 'amount' => $amount,
                 'method' => $method,
-                'paid_at' => $paidAt,
+                'paid_at' => $paidAt ?? now(),
                 'note' => $note,
             ]);
 
@@ -110,4 +110,76 @@ class PaymentService
         ]);
     }
 }
+public function updatePayment(
+        Payment $payment,
+        array $data
+    ): array { // سنرجع كل شيء للرد النهائي
+        return DB::transaction(function () use ($payment, $data) {
+
+            $subscription = $payment->subscription;
+
+            // 👇 نجهز القيم الجديدة، مع fallback للقيم القديمة
+            $newAmount = $data['amount'] ?? $payment->amount;
+            $method = $data['method'] ?? $payment->method;
+            $paidAt = isset($data['paid_at'])
+                ? Carbon::parse($data['paid_at'])
+                : $payment->paid_at;
+            $note = $data['note'] ?? $payment->note;
+
+            // حساب الفرق
+            $delta = $newAmount - $payment->amount;
+
+            // التحقق من صحة المبلغ
+            $this->validatePaymentUpdateAmount($delta, $subscription);
+
+            // تحديث الدفعة
+            $payment->update([
+                'amount'  => $newAmount,
+                'method'  => $method,
+                'paid_at' => $paidAt,
+                'note'    => $note,
+            ]);
+
+            $subscription->increment('paid_amount', $delta);
+            $this->updateSubscriptionStatus($subscription);
+
+            return [
+                'payment' => $payment->fresh(),
+                'subscription' => $subscription->fresh(),
+                'remaining_amount' => $subscription->remaining_amount,
+            ];
+        });
+    }
+
+    private function validatePaymentUpdateAmount(float $delta, Subscription $subscription): void
+    {
+        if ($delta > 0 && $subscription->paid_amount + $delta > $subscription->net_fee) {
+            throw ValidationException::withMessages([
+                'amount' => ['قيمة الدفعة المعدلة تتجاوز المبلغ المتبقي على الطالب']
+            ]);
+        }
+
+        if ($delta + $subscription->paid_amount < 0) {
+            throw ValidationException::withMessages([
+                'amount' => ['المبلغ بعد التعديل لا يمكن أن يكون أقل من صفر']
+            ]);
+        }
+    }
+
+    public function deletePayment(Payment $payment): void
+{
+    DB::transaction(function () use ($payment) {
+        $subscription = $payment->subscription;
+
+        // نخصم قيمة الدفعة من المبلغ المدفوع في الاشتراك
+        $subscription->decrement('paid_amount', $payment->amount);
+
+        // تحديث حالة الاشتراك بعد حذف الدفعة
+        $this->updateSubscriptionStatus($subscription);
+
+        // حذف الدفعة نفسها
+        $payment->delete();
+    });
+}
+
 }

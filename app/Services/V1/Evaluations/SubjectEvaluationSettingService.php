@@ -51,9 +51,9 @@ public function create(int $subjectId, array $data): SubjectEvaluationSetting
         $this->authorize($user, $subjectevaluationsetting->subject);
 
         if (isset($data['evaluation_type'])) {
-            $type = EvaluationType::from($data['evaluation_type']);
+            $type = EvaluationType::fromArabic($data['evaluation_type']);
         } else {
-            $type = EvaluationType::from($subjectevaluationsetting->evaluation_type);
+            $type = EvaluationType::fromArabic($subjectevaluationsetting->evaluation_type);
         }
 
         $this->validateByType($type, $data, true);
