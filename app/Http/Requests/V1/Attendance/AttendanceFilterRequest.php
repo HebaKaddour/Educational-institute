@@ -49,6 +49,7 @@ class AttendanceFilterRequest extends FormRequest
             'gender.in' => 'الجنس المختار غير صالح',
             'grade.required' => 'الصف مطلوب',
             'section.string' => 'الشعبة غير صالحة',
+            'day.in'
 
         ];
     }

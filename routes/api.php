@@ -7,9 +7,10 @@ use App\Http\Controllers\Api\V1\StudentController;
 use App\Http\Controllers\Api\V1\SubjectController;
 use App\Http\Controllers\Api\V1\TeacherController;
 use App\Http\Controllers\Api\V1\AttendanceController;
-use App\Http\Controllers\Api\AttendanceReportController;
 use App\Http\Controllers\Api\V1\SettingsSchedulerController;
 use App\Http\Controllers\Api\V1\Reports\StudentReportController;
+use App\Http\Controllers\Api\V1\Reports\UnifiedReportController;
+use App\Http\Controllers\Api\V1\Reports\AttendanceReportController;
 use App\Http\Controllers\Api\V1\Evaluations\EvaluationTypeController;
 use App\Http\Controllers\Api\V1\Evaluations\StudentEvaluationsController;
 use App\Http\Controllers\Api\V1\Evaluations\SubjectEvaluationSettingController;
@@ -94,18 +95,9 @@ Route::prefix('V1')->group(function () {
 
 
     // Reports
-      Route::get('reports/students', [StudentReportController::class, 'index']);
-      Route::get('grades/print/pdf', [StudentReportController::class, 'print']);
-
-
-    Route::get('attendance/daily', [AttendanceReportController::class,'daily']);
-    Route::get('attendance/daily/print', [AttendanceReportController::class,'dailyPrint']);
-
-    Route::get('attendance/student', [AttendanceReportController::class,'byStudent']);
-    Route::get('attendance/student/print', [AttendanceReportController::class,'byStudentPrint']);
-
-    Route::get('attendance/grade', [AttendanceReportController::class,'byGrade']);
-    Route::get('attendance/grade/print', [AttendanceReportController::class,'byGradePrint']);
+      //Route::get('/grades/report', [StudentReportController::class, 'generatePdf']);
+      //Route::get('/reports/attendance/print',[AttendanceReportController::class, 'generatePdf']);
+      Route::get('/reports/print',[UnifiedReportController::class, 'print']);
       });
     });
     });

@@ -112,7 +112,7 @@ public function updateAttendance(array $data, Attendance $attendance): Attendanc
         'evaluations'
     ]);
 }
-
+//in AttendanceService
     public function daily(array $filters): LengthAwarePaginator
     {
         $perPage = $filters['per_page'] ?? 15;

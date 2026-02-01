@@ -261,7 +261,7 @@ public function addEvaluationForStudent(array $data): void
     {
         $query = Evaluation::with([
             'student:id,full_name,gender,grade',
-            'subject:id,name,teacher_id'
+            'subject:id,name','teacher:id,name'
         ])->filter($filters, $user);
 
         // إذا تم تمرير student_id فقط نعيد كل النتائج
