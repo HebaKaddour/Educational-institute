@@ -249,4 +249,12 @@ public function updateSubscription(Subscription $subscription, array $data): Sub
             return $student->refresh()->load('subscriptions');
         });
     }
+
+  public function filterStudents(array $filters, int $perPage = 15): LengthAwarePaginator
+    {
+        return Student::query()
+            ->filter($filters)
+            ->orderBy('full_name')
+            ->paginate($perPage);
+    }
 }

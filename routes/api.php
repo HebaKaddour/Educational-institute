@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\V1\paymentController;
 use App\Http\Controllers\Api\V1\StudentController;
 use App\Http\Controllers\Api\V1\SubjectController;
 use App\Http\Controllers\Api\V1\TeacherController;
+use App\Http\Controllers\Api\V1\WhatsAppController;
 use App\Http\Controllers\Api\V1\AttendanceController;
 use App\Http\Controllers\Api\V1\SettingsSchedulerController;
 use App\Http\Controllers\Api\V1\Reports\StudentReportController;
@@ -52,6 +53,7 @@ Route::prefix('V1')->group(function () {
             Route::apiResource('teachers', TeacherController::class);
             Route::apiResource('subjects', SubjectController::class);
              Route::get('students/search', [StudentController::class, 'search']);
+              Route::get('filter/students', [StudentController::class, 'filterStudents']);
             Route::apiResource('students', StudentController::class);
             Route::get('allSubscriptions/details',[StudentController::class,'allSubscriptions']);
             Route::patch('/students-profile/{student}', [StudentController::class, 'updateProfile']);
@@ -93,11 +95,8 @@ Route::prefix('V1')->group(function () {
     Route::delete('settings/evaluation-types/{evaluationType}', [EvaluationTypeController::class, 'destroy']);
 
 
-
-    // Reports
-      //Route::get('/grades/report', [StudentReportController::class, 'generatePdf']);
-      //Route::get('/reports/attendance/print',[AttendanceReportController::class, 'generatePdf']);
       Route::get('/reports/print',[UnifiedReportController::class, 'print']);
+      Route::get('students/{student}/whatsapp-link',[WhatsAppController::class, 'studentLink']);
       });
     });
     });

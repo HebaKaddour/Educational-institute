@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 
 use App\Models\Student;
 use App\Models\Subscription;
+use Illuminate\Http\Request;
 use App\Services\V1\StudentService;
 use App\Http\Controllers\Controller;
 use App\Http\Resources\StudentResource;
@@ -168,5 +169,21 @@ public function changeStatus(Student $student)
         );
 }
 
+public function filterStudents(Request $request)
+{
+    $filters = $request->only([
+        'search',
+        'grade',
+        'section',
+        'gender',
+        'status',
+    ]);
+
+    $perPage = $request->integer('per_page', 15);
+
+    $students = $this->studentService->filterStudents($filters, $perPage);
+
+    return self::paginated($students, 'تم جلب الطلاب بنجاح');
 }
 
+}

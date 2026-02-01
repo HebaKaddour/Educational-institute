@@ -36,6 +36,7 @@ class Attendance extends Model
 
 public function scopeFilter($query, array $filters)
 {
+
     return $this
         ->when($filters['date'] ?? null, fn($q) => $q->where('date', $filters['date']))
         ->when($filters['subject_id'] ?? null, fn($q) => $q->where('subject_id', $filters['subject_id']))
@@ -46,7 +47,6 @@ public function scopeFilter($query, array $filters)
 
         ->when($filters['section'] ?? null, fn($q) => $q->whereHas('student', fn($sq) => $sq->where('section', $filters['section'])));
 }
-
 protected $casts = [
     'date' => 'date',
 ];

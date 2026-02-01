@@ -41,4 +41,14 @@ class Student extends Model
         ->where('subject_id', request('subject_id'));
 }
 
+public function scopeFilter($query, array $filters)
+{
+
+    return $this
+        ->when($filters['gender'] ?? null, fn($q) => $q->where('gender', $filters['gender']))
+        ->when($filters['section'] ?? null, fn($q) => $q->where('section', $filters['section']))
+        ->when($filters['school'] ?? null, fn($q) => $q->where('school', $filters['school']))
+         ->when($filters['grade'] ?? null, fn($q) => $q->where('grade', $filters['grade']));
+}
+
 }
