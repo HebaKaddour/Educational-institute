@@ -63,8 +63,6 @@ class AttendanceService
                     'student_id' => $student->id,
                     'date'       => $data['date'],
                     'subject_id' => $subject?->id,
-                ],
-                [
                     'week'          => $data['week'],
                     'day'           => $data['day'],
                     'status'        => $item['status'],
@@ -76,7 +74,6 @@ class AttendanceService
         }
     });
 
-    // ⬅️ هنا السر: evaluations فقط (الـ type سيظهر تلقائيًا)
     return Attendance::with([
         'student',
         'subject',
