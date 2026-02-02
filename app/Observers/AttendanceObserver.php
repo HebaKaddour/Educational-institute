@@ -22,40 +22,59 @@ class AttendanceObserver
     }
 
     protected function handleAttendance(Attendance $attendance, bool $isUpdate = false)
-    {
-        if (!$attendance->subject_id) return;
+{
+    if (!$attendance->subject_id) return;
 
-        $teacherId = Subject::where('id', $attendance->subject_id)->value('teacher_id');
-        if (!$teacherId) return;
+    $teacherId = Subject::where('id', $attendance->subject_id)->value('teacher_id');
+    if (!$teacherId) return;
 
-        // ======================
-        // 1️⃣ الحضور
-        // ======================
-        if (in_array($attendance->status, ['حضور', 'بعذر'])) {
-            $this->syncEvaluation($attendance, EvaluationType::ATTENDANCE, $teacherId);
-        }
-
-        if ($attendance->status === 'غياب') {
-            $this->deleteEvaluation($attendance, EvaluationType::ATTENDANCE);
-            $this->deleteEvaluation($attendance, EvaluationType::PARTICIPATION);
-
-            if ($attendance->participation) {
-                $attendance->updateQuietly(['participation' => false]);
-            }
-            return;
-        }
-
-        // ======================
-        // 2️⃣ المشاركة
-        // ======================
-        if ($attendance->participation) {
-            $this->syncEvaluation($attendance, EvaluationType::PARTICIPATION, $teacherId);
-        }
-
-        if ($isUpdate && $attendance->wasChanged('participation') && !$attendance->participation) {
-            $this->deleteEvaluation($attendance, EvaluationType::PARTICIPATION);
-        }
+    // ======================
+    // 1️⃣ الحضور
+    // ======================
+    if (in_array($attendance->status, ['حضور', 'بعذر'])) {
+        $this->syncEvaluation($attendance, EvaluationType::ATTENDANCE, $teacherId);
     }
+
+    // ======================
+    // ❗ حالة بعذر: المشاركة = 0 دائمًا
+    // ======================
+    if ($attendance->status === 'بعذر') {
+
+        // حذف تقييم المشاركة إن وجد
+        $this->deleteEvaluation($attendance, EvaluationType::PARTICIPATION);
+
+        // إجبار المشاركة على false
+        if ($attendance->participation) {
+            $attendance->updateQuietly(['participation' => false]);
+        }
+
+        return; // لا نكمل أي لوجيك مشاركة
+    }
+
+    // ======================
+    // الغياب
+    // ======================
+    if ($attendance->status === 'غياب') {
+        $this->deleteEvaluation($attendance, EvaluationType::ATTENDANCE);
+        $this->deleteEvaluation($attendance, EvaluationType::PARTICIPATION);
+
+        if ($attendance->participation) {
+            $attendance->updateQuietly(['participation' => false]);
+        }
+        return;
+    }
+
+    // ======================
+    // 2️⃣ المشاركة (فقط للحضور)
+    // ======================
+    if ($attendance->participation) {
+        $this->syncEvaluation($attendance, EvaluationType::PARTICIPATION, $teacherId);
+    }
+
+    if ($isUpdate && $attendance->wasChanged('participation') && !$attendance->participation) {
+        $this->deleteEvaluation($attendance, EvaluationType::PARTICIPATION);
+    }
+}
 
     // ======================
     // Helpers

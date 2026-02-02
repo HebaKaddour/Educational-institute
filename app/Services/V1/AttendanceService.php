@@ -58,7 +58,7 @@ class AttendanceService
                 ]);
             }
 
-            $attendance = Attendance::updateOrCreate(
+            $attendance = Attendance::Create(
                 [
                     'student_id' => $student->id,
                     'date'       => $data['date'],
