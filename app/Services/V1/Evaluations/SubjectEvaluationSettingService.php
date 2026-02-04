@@ -37,6 +37,15 @@ public function create(int $subjectId, array $data): SubjectEvaluationSetting
 
         $this->validateByType($type, $data);
 
+    $exists = SubjectEvaluationSetting::where('subject_id', $subject->id)
+        ->where('evaluation_type', $data['evaluation_type'])
+        ->exists();
+
+    if ($exists) {
+        throw ValidationException::withMessages([
+            'evaluation_type' => "إعدادات تقييم ({$data['evaluation_type']}) للمادة ({$subject->name}) موجودة مسبقاً"
+        ]);
+    }
 
         return SubjectEvaluationSetting::create([
             'subject_id'         => $subject->id,
