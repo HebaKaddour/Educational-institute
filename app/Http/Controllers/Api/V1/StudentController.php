@@ -186,4 +186,9 @@ public function filterStudents(Request $request)
     return self::paginated($students, 'تم جلب الطلاب بنجاح');
 }
 
+public function getStudentsProfile(){
+ $students = Student::paginate(15);
+    return self::paginated($students,'قائمة الطلاب');
+}
+
 }

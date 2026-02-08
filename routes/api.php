@@ -34,6 +34,9 @@ Route::prefix('V1')->group(function () {
         Route::put('/attendance/daily/{attendance}', [AttendanceController::class, 'updateDailyAttendance']);
        Route::delete('attendances/{attendance}',[AttendanceController::class, 'destroy']);
 
+
+        Route::get('profile/students', [StudentController::class, 'getStudentsProfile']);
+
         Route::get('filter/students', [StudentController::class, 'filterStudents']);
 
 
