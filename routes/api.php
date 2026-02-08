@@ -34,6 +34,9 @@ Route::prefix('V1')->group(function () {
         Route::put('/attendance/daily/{attendance}', [AttendanceController::class, 'updateDailyAttendance']);
        Route::delete('attendances/{attendance}',[AttendanceController::class, 'destroy']);
 
+       //show the subjects:
+       Route::get('/teacher/subjects', [TeacherController::class, 'mySubjects']);
+
          // Settings Subject Evaluation
         Route::get('subjects/{subject}/evaluation-settings', [SubjectEvaluationSettingController::class, 'index']);
         Route::post('subjects/{subject}/evaluation-settings', [SubjectEvaluationSettingController::class, 'store']);

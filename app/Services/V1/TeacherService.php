@@ -2,6 +2,7 @@
 namespace App\Services\V1;
 
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
@@ -47,7 +48,7 @@ public function updateTeacher(User $teacher, array $data): User
 
         return $teacher;
     }
-    
+
     public function deleteTeacher(User $teacher): void
     {
         $this->ensureTeacher($teacher);
@@ -60,4 +61,13 @@ public function updateTeacher(User $teacher, array $data): User
             throw new ModelNotFoundException('المعلم غير موجود');
         }
     }
+
+    public function getMySubjects()
+{
+    $user = Auth::user();
+    $this->ensureTeacher($user);
+
+    return $user->subjects()->get();
+}
+
 }

@@ -68,4 +68,13 @@ class TeacherController extends Controller
             'تم حذف المعلم بنجاح',200
         );
     }
+
+    public function mySubjects()
+{
+    return self::success(
+            $this->teacherService->getMySubjects(),
+            'موادي الدراسية :',
+            200
+    );
+}
 }
